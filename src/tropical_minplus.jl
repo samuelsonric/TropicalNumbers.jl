@@ -1,7 +1,7 @@
 
 
 """
-    TropicalMinPlus{T} <: AbstractSemiring
+    TropicalMinPlus{T} <: AbstractIdempotentSemiring{T}
 
 TropicalMinPlus is a semiring algebra, can be described by
 * TropicalMinPlus, (ℝ, min, +, Inf, 0).
@@ -28,7 +28,7 @@ julia> zero(TropicalMinPlusF64)
 Infₛ
 ```
 """
-struct TropicalMinPlus{T} <: AbstractSemiring
+struct TropicalMinPlus{T} <: AbstractIdempotentSemiring{T}
     n::T
     TropicalMinPlus{T}(x) where T = new{T}(T(x))
     function TropicalMinPlus(x::T) where T
@@ -42,60 +42,53 @@ struct TropicalMinPlus{T} <: AbstractSemiring
     end
 end
 
-Base.show(io::IO, t::TropicalMinPlus) = Base.print(io, "$(t.n)ₛ")
+content(a::TropicalMinPlus) = a.n
 
 Base.:^(a::TropicalMinPlus, b::Real) = TropicalMinPlus(a.n * b)
 Base.:^(a::TropicalMinPlus, b::Integer) = TropicalMinPlus(a.n * b)
+
+#
+#   -Inf +  Inf =  Inf
+#    Inf + -Inf =  Inf
+#
 Base.:*(a::TropicalMinPlus, b::TropicalMinPlus) = TropicalMinPlus(a.n + b.n)
-function Base.:*(a::TropicalMinPlus{<:Rational}, b::TropicalMinPlus{<:Rational})
-    if a.n.den == 0
-        a
-    elseif b.n.den == 0
-        b
+
+function Base.:*(a::T, b::T) where {T <: TropicalMinPlus{<:Rational}}
+    if a == typemin(T) && b == typemax(T) || a == typemax(T) && b == typemin(T)
+        c = typemin(T)
     else
-        TropicalMinPlus(a.n + b.n)
+        c = Tropical(a.n + b.n)
     end
+
+    return c
 end
 
-Base.:+(a::TropicalMinPlus, b::TropicalMinPlus) = TropicalMinPlus(min(a.n, b.n))
+inf(a::TropicalMinPlus, b::TropicalMinPlus) = TropicalMinPlus(max(a.n, b.n))
+sup(a::TropicalMinPlus, b::TropicalMinPlus) = TropicalMinPlus(min(a.n, b.n))
 Base.typemin(::Type{TropicalMinPlus{T}}) where T = TropicalMinPlus(posinf(T))
-Base.zero(::Type{TropicalMinPlus{T}}) where T = typemin(TropicalMinPlus{T})
-Base.zero(::TropicalMinPlus{T}) where T = zero(TropicalMinPlus{T})
-
+Base.typemax(::Type{TropicalMinPlus{T}}) where T = TropicalMinPlus(neginf(T))
 Base.one(::Type{TropicalMinPlus{T}}) where T = TropicalMinPlus(zero(T))
-Base.one(::TropicalMinPlus{T}) where T = one(TropicalMinPlus{T})
 
 # inverse and division
-Base.inv(x::TropicalMinPlus) = TropicalMinPlus(-x.n)
+#Base.inv(x::TropicalMinPlus) = TropicalMinPlus(-x.n)
+
+#
+#    Inf -  Inf = -Inf
+#   -Inf - -Inf = -Inf
+#
+Base.:\(y::TropicalMinPlus, x::TropicalMinPlus) = x / y
 Base.:/(x::TropicalMinPlus, y::TropicalMinPlus) = TropicalMinPlus(x.n - y.n)
 Base.div(x::TropicalMinPlus, y::TropicalMinPlus) = TropicalMinPlus(x.n - y.n)
 
-# ordering
-function Base.:(==)(a::TropicalMinPlus, b::TropicalMinPlus)
-    return b.n == a.n
-end
+function Base.:/(b::T, a::T) where {T <: TropicalMinPlus{<:Rational}}
+    if a == b == typemin(T) || a == b == typemax(T) 
+        c = typemax(T)
+    else
+        c = Tropical(b.n - a.n)
+    end
 
-function Base.:>=(a::TropicalMinPlus, b::TropicalMinPlus)
-    return b.n >= a.n
+    return c
 end
-
-function Base.:<=(a::TropicalMinPlus, b::TropicalMinPlus)
-    return b.n <= a.n
-end
-
-function Base.:<(a::TropicalMinPlus, b::TropicalMinPlus)
-    return b.n < a.n
-end
-
-function Base.:>(a::TropicalMinPlus, b::TropicalMinPlus)
-    return b.n > a.n
-end
-
-function Base.isless(a::TropicalMinPlus, b::TropicalMinPlus)
-    return isless(b.n, a.n)
-end
-
-Base.isapprox(x::TropicalMinPlus, y::TropicalMinPlus; kwargs...) = isapprox(x.n, y.n; kwargs...)
 
 # promotion rules
 Base.promote_rule(::Type{TropicalMinPlus{T1}}, b::Type{TropicalMinPlus{T2}}) where {T1, T2} = TropicalMinPlus{promote_type(T1,T2)}

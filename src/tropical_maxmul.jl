@@ -1,7 +1,7 @@
 
 
 """
-    TropicalMaxMul{T} <: AbstractSemiring
+    TropicalMaxMul{T} <: AbstractIdempotentSemiring{T}
 
 TropicalMaxMul is a semiring algebra, can be described by
 * TropicalMaxMul, (ℝ⁺, max, ⋅, 0, 1).
@@ -28,7 +28,7 @@ julia> zero(TropicalMaxMulF64)
 0.0ₓ
 ```
 """
-struct TropicalMaxMul{T} <: AbstractSemiring
+struct TropicalMaxMul{T} <: AbstractIdempotentSemiring{T}
     n::T
     function TropicalMaxMul{T}(x) where T 
         new{T}(T(x))
@@ -44,27 +44,54 @@ struct TropicalMaxMul{T} <: AbstractSemiring
     end
 end
 
-Base.show(io::IO, t::TropicalMaxMul) = Base.print(io, "$(t.n)ₓ")
+content(a::TropicalMaxMul) = a.n
 
 Base.:^(a::TropicalMaxMul, b::Real) = TropicalMaxMul(a.n ^ b)
 Base.:^(a::TropicalMaxMul, b::Integer) = TropicalMaxMul(a.n ^ b)
+
+#
+#    0   * Inf = 0
+#    Inf * 0   = 0
+#
 Base.:*(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(a.n * b.n)
 
-Base.:+(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(max(a.n, b.n))
-Base.typemin(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(zero(T))
-Base.typemax(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(posinf(T))
-Base.zero(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(zero(T))
-Base.zero(::TropicalMaxMul{T}) where T = zero(TropicalMaxMul{T})
+function Base.:*(a::T, b::T) where {T <: TropicalMaxMul{<:Rational}}
+    if a == typemin(T) && b == typemax(T) || a == typemax(T) && b == typemin(T)
+        c = typemin(T)
+    else
+        c = Tropical(a.n + b.n)
+    end
 
+    return c
+end
+
+inf(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(min(a.n, b.n))
+sup(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(max(a.n, b.n))
+Base.typemin(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(neginf(T))
+Base.typemax(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(posinf(T))
 Base.one(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(one(T))
-Base.one(::TropicalMaxMul{T}) where T = one(TropicalMaxMul{T})
 
 # inverse and division
-Base.inv(x::TropicalMaxMul{T}) where T = TropicalMaxMul(one(T) / x.n)
-Base.:/(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(x.n / y.n)
-Base.div(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(x.n ÷ y.n)
+#Base.inv(x::TropicalMaxMul) = TropicalMaxMul(inv(x.n))
 
-Base.isapprox(x::TropicalMaxMul, y::TropicalMaxMul; kwargs...) = isapprox(x.n, y.n; kwargs...)
+#
+#   Inf / Inf = Inf
+#   0   / 0   = Inf
+#
+Base.:\(y::TropicalMaxMul, x::TropicalMaxMul) = x / y
+Base.:/(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(x.n / y.n)
+
+function Base.:/(b::T, a::T) where {T <: TropicalMaxMul{<:Rational}}
+    if a == b == typemin(T) || a == b == typemax(T)
+        c = typemax(T)
+    else
+        c = Tropical(b.n - a.n)
+    end
+
+    return c
+end
+
+Base.div(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(div(x.n, y.n))
 
 # promotion rules
 Base.promote_rule(::Type{TropicalMaxMul{T1}}, b::Type{TropicalMaxMul{T2}}) where {T1, T2} = TropicalMaxMul{promote_type(T1,T2)}

@@ -1,5 +1,5 @@
 """
-    CountingTropical{T,CT} <: Number
+    CountingTropical{T,CT} <: AbstractSemiring{T}
 
 Counting tropical number type is also a semiring algebra.
 It is tropical algebra with one extra field for counting, it is introduced in [arXiv:2008.06888](https://arxiv.org/abs/2008.06888).
@@ -20,7 +20,7 @@ julia> zero(CountingTropicalF64)
 (-Inf, 0.0)ₜ
 ```
 """
-struct CountingTropical{T,CT} <: Number
+struct CountingTropical{T,CT} <: AbstractSemiring{T}
     n::T
     c::CT
 end
@@ -53,13 +53,11 @@ Base.typemin(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = Count
 Base.zero(::Type{CountingTropical{T}}) where T = zero(CountingTropical{T,T})
 Base.zero(::Type{CountingTropical{T,CT}}) where {T<:Integer,CT} = CountingTropical(T(-999999), zero(CT))
 Base.zero(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = typemin(CountingTropical{T, CT})
-Base.zero(::T) where T<:CountingTropical = zero(T)
 Base.one(::Type{CountingTropical{T}}) where T = one(CountingTropical{T,T})
 Base.one(::Type{CountingTropical{T,CT}}) where {T<:Integer,CT} = CountingTropical(zero(T), one(CT))
 Base.one(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = CountingTropical(zero(T), one(CT))
-Base.one(::T) where T<:CountingTropical = one(T)
 Base.isapprox(a::CountingTropical, b::CountingTropical; kwargs...) = isapprox(a.n, b.n; kwargs...) && isapprox(a.c, b.c; kwargs...)
 
-Base.show(io::IO, t::CountingTropical) = Base.print(io, "$((t.n, t.c))ₜ")
+Base.show(io::IO, t::CountingTropical) = Base.print(io, "$((t.n, t.c))s")
 
 Base.promote_rule(::Type{CountingTropical{T1,CT1}}, b::Type{CountingTropical{T2,CT2}}) where {T1,T2,CT1,CT2} = CountingTropical{promote_type(T1,T2), promote_type(CT1,CT2)}

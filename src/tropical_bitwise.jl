@@ -1,5 +1,5 @@
 """
-    TropicalBitwise{T} <: AbstractSemiring
+    TropicalBitwise{T} <: AbstractSimpleSemiring{T}
 
 `TropicalBitwise` is a semiring algebra that parallelizes the [`TropicalAndOr`](@ref) algebra,
 It can be described by
@@ -27,7 +27,7 @@ julia> one(TropicalBitwiseI64)
 -1ₛ
 ```
 """
-struct TropicalBitwise{T} <: AbstractSemiring
+struct TropicalBitwise{T} <: AbstractSimpleSemiring{T}
     n::T
 end
 
@@ -39,44 +39,23 @@ function TropicalBitwise{T}(a::TropicalBitwise) where {T}
     return TropicalBitwise{T}(a.n)
 end
 
-function Base.show(io::IO, a::TropicalBitwise)
-    print(io, "$(a.n)ₛ")
-    return
-end
-
-function Base.isapprox(a::TropicalBitwise, b::TropicalBitwise; kw...)
-    return isapprox(a.n, b.n; kw...)
-end
-
 function Base.promote_rule(::Type{TropicalBitwise{U}}, ::Type{TropicalBitwise{V}}) where {U, V}
     W = promote_type(U, V)
     return TropicalBitwise{W}
 end
 
-function Base.:+(a::TropicalBitwise, b::TropicalBitwise)
-    n = a.n | b.n
-    return TropicalBitwise(n)
+function content(a::TropicalBitwise)
+    return a.n
 end
 
-function Base.:*(a::TropicalBitwise, b::TropicalBitwise)
+function inf(a::TropicalBitwise, b::TropicalBitwise)
     n = a.n & b.n
     return TropicalBitwise(n)
 end
 
-function Base.zero(::Type{T}) where {T <: TropicalBitwise}
-    return typemin(T)
-end
-
-function Base.zero(::T) where {T <: TropicalBitwise}
-    return zero(T)
-end
-
-function Base.one(::Type{T}) where {T <: TropicalBitwise}
-    return typemax(T)
-end
-
-function Base.one(::T) where {T <: TropicalBitwise}
-    return one(T)
+function sup(a::TropicalBitwise, b::TropicalBitwise)
+    n = a.n | b.n
+    return TropicalBitwise(n)
 end
 
 function Base.typemin(::Type{TropicalBitwise{T}}) where {T}
@@ -89,22 +68,14 @@ function Base.typemax(::Type{TropicalBitwise{T}}) where {T}
     return TropicalBitwise(n)
 end
 
-function Base.:(==)(a::TropicalBitwise, b::TropicalBitwise)
-    return a.n == b.n
+function Base.:\(a::TropicalBitwise, b::TropicalBitwise)
+    return b / a
 end
 
-function Base.:>=(a::TropicalBitwise, b::TropicalBitwise)
-    return b.n <= a.n
+function Base.:/(b::TropicalBitwise, a::TropicalBitwise)
+    return TropicalBitwise(b.n | ~a.n)
 end
 
-function Base.:<=(a::TropicalBitwise, b::TropicalBitwise)
-    return a.n | b.n == b.n
-end
-
-function Base.:<(a::TropicalBitwise, b::TropicalBitwise)
-    return a != b && a <= b
-end
-
-function Base.:>(a::TropicalBitwise, b::TropicalBitwise)
-    return b < a
+function Base.div(b::TropicalBitwise, a::TropicalBitwise)
+    return b / a
 end

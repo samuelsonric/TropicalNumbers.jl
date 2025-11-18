@@ -1,14 +1,5 @@
-# define the neginf and posinf
-neginf(::Type{T}) where T = typemin(T)
-neginf(::Type{T}) where T<:AbstractFloat = typemin(T)
-neginf(::Type{T}) where T<:Rational = typemin(T)
-neginf(::Type{T}) where T<:Integer = T(-999999)
-neginf(::Type{Int16}) = Int16(-16384)
-neginf(::Type{Int8}) = Int8(-64)
-posinf(::Type{T}) where T = - neginf(T)
-
 """
-    TropicalMaxPlus{T} = Tropical{T} <: AbstractSemiring
+    TropicalMaxPlus{T} = Tropical{T} <: AbstractIdempotentSemiring{T}
 
 TropicalMaxPlus is a semiring algebra, can be described by
 * Tropical (TropicalMaxPlus), (ℝ, max, +, -Inf, 0).
@@ -35,7 +26,7 @@ julia> zero(TropicalMaxPlusF64)
 -Infₜ
 ```
 """
-struct Tropical{T} <: AbstractSemiring
+struct Tropical{T} <: AbstractIdempotentSemiring{T}
     n::T
     Tropical{T}(x) where T = new{T}(T(x))
     function Tropical(x::T) where T
@@ -49,35 +40,54 @@ struct Tropical{T} <: AbstractSemiring
     end
 end
 
-
-Base.show(io::IO, t::Tropical) = Base.print(io, "$(t.n)ₜ")
+content(a::Tropical) = a.n
 
 Base.:^(a::Tropical, b::Real) = Tropical(a.n * b)
 Base.:^(a::Tropical, b::Integer) = Tropical(a.n * b)
-Base.:*(a::Tropical, b::Tropical) = Tropical(a.n + b.n)
-function Base.:*(a::Tropical{<:Rational}, b::Tropical{<:Rational})
-    if a.n.den == 0
-        a
-    elseif b.n.den == 0
-        b
-    else
-        Tropical(a.n + b.n)
-    end
-end
-Base.:+(a::Tropical, b::Tropical) = Tropical(max(a.n, b.n))
-Base.typemin(::Type{Tropical{T}}) where T = Tropical(neginf(T))
-Base.zero(::Type{Tropical{T}}) where T = typemin(Tropical{T})
-Base.zero(::Tropical{T}) where T = zero(Tropical{T})
 
+#
+#   -Inf +  Inf = -Inf
+#    Inf + -Inf = -Inf
+#
+Base.:*(a::Tropical, b::Tropical) = Tropical(a.n + b.n)
+
+function Base.:*(a::T, b::T) where {T <: Tropical{<:Rational}}
+    if a == typemin(T) && b == typemax(T) || a == typemax(T) && b == typemin(T)
+        c = typemin(T)
+    else
+        c = Tropical(a.n + b.n)
+    end
+
+    return c
+end
+
+inf(a::Tropical, b::Tropical) = Tropical(min(a.n, b.n))
+sup(a::Tropical, b::Tropical) = Tropical(max(a.n, b.n))
+Base.typemin(::Type{Tropical{T}}) where {T} = Tropical(neginf(T))
+Base.typemax(::Type{Tropical{T}}) where {T} = Tropical(posinf(T))
 Base.one(::Type{Tropical{T}}) where T = Tropical(zero(T))
-Base.one(::Tropical{T}) where T = one(Tropical{T})
 
 # inverse and division
-Base.inv(x::Tropical) = Tropical(-x.n)
-Base.:/(x::Tropical, y::Tropical) = Tropical(x.n - y.n)
-Base.div(x::Tropical, y::Tropical) = Tropical(x.n - y.n)
+#Base.inv(x::Tropical) = Tropical(-x.n)
 
-Base.isapprox(x::Tropical, y::Tropical; kwargs...) = isapprox(x.n, y.n; kwargs...)
+#
+#    Inf -  Inf =  Inf
+#   -Inf - -Inf =  Inf
+#
+Base.:\(y::Tropical, x::Tropical) = x / y
+Base.:/(x::Tropical, y::Tropical) = Tropical(x.n - y.n)
+
+function Base.:/(b::T, a::T) where {T <: Tropical{<:Rational}}
+    if a == b == typemin(T) || a == b == typemax(T) 
+        c = typemax(T)
+    else
+        c = Tropical(b.n - a.n)
+    end
+
+    return c
+end
+
+Base.div(x::Tropical, y::Tropical) = x / y
 
 # promotion rules
 Base.promote_rule(::Type{Tropical{T1}}, b::Type{Tropical{T2}}) where {T1, T2} = Tropical{promote_type(T1,T2)}

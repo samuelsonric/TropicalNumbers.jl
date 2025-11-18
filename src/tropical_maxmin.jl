@@ -1,5 +1,5 @@
 """
-    TropicalMaxMin{T} <: AbstractSemiring
+    TropicalMaxMin{T} <: AbstractSimpleSemiring{T}
 
 TropicalMaxMin is a semiring algebra, can be described by
 * TropicalMaxMin, (ℝ, max, min, -Inf, Inf).
@@ -26,7 +26,7 @@ julia> one(TropicalMaxMinF64)
 Infₛ
 ```
 """
-struct TropicalMaxMin{T} <: AbstractSemiring
+struct TropicalMaxMin{T} <: AbstractSimpleSemiring{T}
     n::T
 end
 
@@ -38,44 +38,23 @@ function TropicalMaxMin{T}(a::TropicalMaxMin) where {T}
     return TropicalMaxMin{T}(a.n)
 end
 
-function Base.show(io::IO, a::TropicalMaxMin)
-    print(io, "$(a.n)ₛ")
-    return
-end
-
-function Base.isapprox(a::TropicalMaxMin, b::TropicalMaxMin; kw...)
-    return isapprox(a.n, b.n; kw...)
-end
-
 function Base.promote_rule(::Type{TropicalMaxMin{U}}, ::Type{TropicalMaxMin{V}}) where {U, V}
     W = promote_type(U, V)
     return TropicalMaxMin{W}
 end
 
-function Base.:+(a::TropicalMaxMin, b::TropicalMaxMin)
-    n = max(a.n, b.n)
-    return TropicalMaxMin(n)
+function content(a::TropicalMaxMin)
+    return a.n
 end
 
-function Base.:*(a::TropicalMaxMin, b::TropicalMaxMin)
+function inf(a::TropicalMaxMin, b::TropicalMaxMin)
     n = min(a.n, b.n)
     return TropicalMaxMin(n)
 end
 
-function Base.zero(::Type{T}) where {T <: TropicalMaxMin}
-    return typemin(T)
-end
-
-function Base.zero(::T) where {T <: TropicalMaxMin}
-    return zero(T)
-end
-
-function Base.one(::Type{T}) where {T <: TropicalMaxMin}
-    return typemax(T)
-end
-
-function Base.one(::T) where {T <: TropicalMaxMin}
-    return one(T)
+function sup(a::TropicalMaxMin, b::TropicalMaxMin)
+    n = max(a.n, b.n)
+    return TropicalMaxMin(n)
 end
 
 function Base.typemin(::Type{TropicalMaxMin{T}}) where {T}
@@ -86,4 +65,16 @@ end
 function Base.typemax(::Type{TropicalMaxMin{T}}) where {T}
     n = posinf(T)
     return TropicalMaxMin(n)
+end
+
+function Base.:\(a::TropicalMaxMin, b::TropicalMaxMin)
+    return b / a
+end
+
+function Base.:/(b::TropicalMaxMin, a::TropicalMaxMin)
+    return a <= b ? typemax(b) : b
+end
+
+function Base.:div(b::TropicalMaxMin, a::TropicalMaxMin)
+    return b / a
 end
