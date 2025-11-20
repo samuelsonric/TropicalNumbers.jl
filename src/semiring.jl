@@ -22,25 +22,7 @@ Fast semiring matrix multiplication is implemented in the following libraries.
 * [`CuTropicalGEMM`](https://github.com/ArrogantGao/CuTropicalGEMM.jl/)
 
 """
-abstract type AbstractSemiring <: Number end
-
-function Base.zero(::T) where {T <: AbstractSemiring}
-    return zero(T)
-end
-
-function Base.one(::T) where {T <: AbstractSemiring}
-    return one(T)
-end
-
-function Base.:*(a::T, b::Bool) where {T <: AbstractSemiring}
-    return b ? a : zero(T)
-end
-
-function Base.:*(b::Bool, a::T) where {T <: AbstractSemiring}
-    return b ? a : zero(T)
-end
-
-struct Semiring{A <: AbstractSemiringAlgebra, T} <: AbstractSemiring
+struct Semiring{A <: AbstractSemiringAlgebra, T} <: Number
     n::T
 
     function Semiring{A, T}(n) where {A <: AbstractSemiringAlgebra, T}
@@ -48,37 +30,41 @@ struct Semiring{A <: AbstractSemiringAlgebra, T} <: AbstractSemiring
     end
 end
 
+const AbstractSemiring{T} = Semiring{<:AbstractSemiringAlgebra, T}
+const AbstractQuantale{T} = Semiring{<:AbstractQuantaleAlgebra, T}
+const AbstractLattice{T} = Semiring{<:AbstractLatticeAlgebra, T}
+
 function Semiring{A}(n::T) where {A <: AbstractSemiringAlgebra, T}
     return Semiring{A, T}(n)
 end
 
 function Semiring{A}(a::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    return Semiring{A}(content(a))
+    return Semiring{A}(a.n)
 end
 
 function Semiring{A, T}(a::Semiring{A}) where {A <: AbstractSemiringAlgebra, T}
-    return Semiring{A, T}(content(a))
+    return Semiring{A, T}(a.n)
 end
 
-function content(a::Semiring)
+function content(a::AbstractSemiring)
     return a.n
 end
 
-function content(::Type{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, T}
+function content(::Type{<:AbstractSemiring{T}}) where {T}
     return T
 end
 
-function Base.show(io::IO, a::Semiring)
-    print(io, content(a))
+function Base.show(io::IO, a::AbstractSemiring)
+    print(io, a.n)
     return
 end
 
-function Base.isnan(a::Semiring)
-    return isnan(content(a))
+function Base.isnan(a::AbstractSemiring)
+    return isnan(a.n)
 end
 
-function Base.isinf(a::Semiring)
-    return isinf(content(a))
+function Base.isinf(a::AbstractSemiring)
+    return isinf(a.n)
 end
 
 function Base.rand(rng::AbstractRNG, sampler::SamplerType{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, T}
@@ -87,11 +73,11 @@ function Base.rand(rng::AbstractRNG, sampler::SamplerType{Semiring{A, T}}) where
 end
 
 function Base.:(==)(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    return content(a) == content(b)
+    return a.n == b.n
 end
 
 function Base.isapprox(a::Semiring{A}, b::Semiring{A}; kw...) where {A <: AbstractSemiringAlgebra}
-    return isapprox(content(a), content(b); kw...)
+    return isapprox(a.n, b.n; kw...)
 end
 
 function Base.isapprox(a::AbstractArray{<:Semiring{A}}, b::AbstractArray{<:Semiring{A}}; kw...) where {A <: AbstractSemiringAlgebra}
@@ -112,33 +98,49 @@ function Base.zero(::Type{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, 
     return Semiring{A}(n)
 end
 
+function Base.zero(::T) where {T <: AbstractSemiring}
+    return zero(T)
+end
+
 function Base.one(::Type{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, T}
     n = one_alg(A, T)
     return Semiring{A}(n)
 end
 
+function Base.one(::T) where {T <: AbstractSemiring}
+    return one(T)
+end
+
 function Base.:+(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    n = add_alg(A, content(a), content(b))
+    n = add_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
 function Base.FastMath.add_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    n = add_fast_alg(A, content(a), content(b))
+    n = add_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
 function Base.:*(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    n = mul_alg(A, content(a), content(b))
+    n = mul_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
+function Base.:*(a::T, b::Bool) where {T <: AbstractSemiring}
+    return b ? a : zero(T)
+end
+
+function Base.:*(b::Bool, a::T) where {T <: AbstractSemiring}
+    return b ? a : zero(T)
+end
+
 function Base.FastMath.mul_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    n = mul_fast_alg(A, content(a), content(b))
+    n = mul_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
 function Base.fma(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    n = mul_add_alg(A, content(a), content(b), content(c))
+    n = mul_add_alg(A, a.n, b.n, c.n)
     return Semiring{A}(n)
 end
 
@@ -146,11 +148,11 @@ end
 # Quantales #
 # --------- #
 
-function Base.typemin(::Type{T}) where {T <: Semiring{<:AbstractQuantaleAlgebra}}
+function Base.typemin(::Type{T}) where {T <: AbstractQuantale}
     return zero(T)
 end
 
-function Base.typemin(::T) where {T <: Semiring{<:AbstractQuantaleAlgebra}}
+function Base.typemin(::T) where {T <: AbstractQuantale}
     return zero(T)
 end
 
@@ -159,12 +161,12 @@ function Base.typemax(::Type{Semiring{A, T}}) where {A <: AbstractQuantaleAlgebr
     return Semiring{A}(n)
 end
 
-function Base.typemax(::T) where {T <: Semiring{<:AbstractQuantaleAlgebra}}
+function Base.typemax(::T) where {T <: AbstractQuantale}
     return typemax(T)
 end
 
 function inf(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = inf_alg(A, content(a), content(b))
+    n = inf_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
@@ -173,12 +175,12 @@ function inf_fast(a, b)
 end
 
 function inf_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = inf_fast_alg(A, content(a), content(b))
+    n = inf_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
 function Base.:\(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = ldiv_alg(A, content(a), content(b))
+    n = ldiv_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
@@ -187,7 +189,7 @@ function ldiv_fast(a, b)
 end
 
 function ldiv_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = ldiv_fast_alg(A, content(a), content(b))
+    n = ldiv_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
@@ -196,25 +198,25 @@ function fli(a, b, c)
 end
 
 function fli(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = inf_ldiv_alg(A, content(a), content(b), content(c))
+    n = inf_ldiv_alg(A, a.n, b.n, c.n)
     return Semiring{A}(n)
 end
 
 function Base.:/(b::Semiring{A}, a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = rdiv_alg(A, content(b), content(a))
+    n = rdiv_alg(A, b.n, a.n)
     return Semiring{A}(n)
 end
 
-function Base.:/(b::T, a::Bool) where {T <: Semiring{<:AbstractQuantaleAlgebra}}
+function Base.:/(b::T, a::Bool) where {T <: AbstractQuantale}
      return a ? b : typemax(T)
 end
 
-function Base.:/(b::Bool, a::T) where {T <: Semiring{<:AbstractQuantaleAlgebra}}
+function Base.:/(b::Bool, a::T) where {T <: AbstractQuantale}
     return b ? one(T) / a : zero(T)
 end
 
 function Base.FastMath.div_fast(b::Semiring{A}, a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = rdiv_fast_alg(A, content(b), content(a))
+    n = rdiv_fast_alg(A, b.n, a.n)
     return Semiring{A}(n)
 end
 
@@ -223,16 +225,16 @@ function fri(b, a, c)
 end
 
 function fri(b::Semiring{A}, a::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    n = inf_rdiv_alg(A, content(b), content(a), content(c))
+    n = inf_rdiv_alg(A, b.n, a.n, c.n)
     return Semiring{A}(n)
 end
 
 function Base.:<=(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    return leq_alg(A, content(a), content(b))
+    return leq_alg(A, a.n, b.n)
 end
 
 function Base.:<(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    return lt_alg(A, content(a), content(b))
+    return lt_alg(A, a.n, b.n)
 end
 
 # -------- #
@@ -240,16 +242,16 @@ end
 # -------- #
 
 function Base.:^(a::Semiring{A}, b::Number) where {A <: AbstractTropicalAlgebra}
-    n = exp_alg(A, content(a), b)
+    n = exp_alg(A, a.n, b)
     return Semiring{A}(n)
 end
 
 function Base.:^(a::Semiring{A}, b::Integer) where {A <: AbstractTropicalAlgebra}
-    n = exp_alg(A, content(a), b)
+    n = exp_alg(A, a.n, b)
     return Semiring{A}(n)
 end
 
 function Base.inv(a::Semiring{A}) where {A <: AbstractTropicalAlgebra}
-    n = inv_alg(A, content(a))
+    n = inv_alg(A, a.n)
     return Semiring{A}(n)
 end
