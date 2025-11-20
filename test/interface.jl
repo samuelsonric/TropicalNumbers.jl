@@ -1,3 +1,5 @@
+using Base.FastMath: mul_fast, add_fast, div_fast
+
 function test_semiring(a::T, b::T, c::T) where {T <: AbstractSemiring}
     # 1 is the multiplicative identity
     @test one(T) * a ≈ a * one(T) ≈ a
@@ -56,6 +58,18 @@ function test_quantale(a::T, b::T, c::T) where {T <: AbstractSemiring}
     @test (a < b) == (a != b && a <= b)
 end
 
+function test_fast(a::T, b::T, c::T) where {T <: AbstractSemiring}
+    @test a + b ≈ add_fast(a, b)
+    @test a * b ≈ mul_fast(a, b)
+    @test a ∧ b ≈ inf_fast(a, b)
+    @test a / b ≈ div_fast(a, b)
+    @test a \ b ≈ ldiv_fast(a, b)
+
+    @test (a * b) + c ≈ fma(a, b, c)
+    @test (a \ b) ∧ c ≈ fli(a, b, c)
+    @test (a / b) ∧ c ≈ fri(a, b, c)
+end
+
 @testset "interface" begin
     types = (
         TropicalMinPlusF64,
@@ -71,6 +85,7 @@ end
         b = rand(T)
         c = rand(T)
 
+        test_fast(a, b, c)
         test_quantale(a, b, c)
         test_quantale(zero(T), b, c)
     end
@@ -86,6 +101,7 @@ end
     c = 3 // 4
 
     for T in types
+        test_fast(T(a), T(b), T(c))
         test_quantale(T(a), T(b), T(c))
         test_quantale(zero(T), T(b), T(c))
         test_quantale(typemax(T), T(b), T(c))
