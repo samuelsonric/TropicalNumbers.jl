@@ -81,6 +81,11 @@ function Base.isinf(a::Semiring)
     return isinf(content(a))
 end
 
+function Base.rand(rng::AbstractRNG, sampler::SamplerType{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, T}
+    n =  rand(rng, T)
+    return Semiring{A}(n)
+end
+
 function Base.:(==)(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
     return content(a) == content(b)
 end

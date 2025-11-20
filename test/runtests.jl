@@ -29,4 +29,8 @@ end
     include("counting_tropical.jl")
 end
 
+@testset "interface" begin
+    include("interface.jl")
+end
+
 doctest(TropicalNumbers)

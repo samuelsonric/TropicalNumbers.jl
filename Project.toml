@@ -1,14 +1,18 @@
 name = "TropicalNumbers"
 uuid = "b3a74e9c-7526-4576-a4eb-79c0d4c32334"
-authors = ["GiggleLiu"]
 version = "0.6.4"
+authors = ["GiggleLiu"]
+
+[deps]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
+Random = "1.11.0"
 julia = "1"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "Documenter"]

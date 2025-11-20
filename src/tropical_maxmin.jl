@@ -39,8 +39,8 @@ one_alg(::Type{MaxMin}, ::Type{T}) where {T} = posinf(T)
 ldiv_alg(::Type{MaxMin}, a, b) = a <= b ? typemax(b) : b
 rdiv_alg(::Type{MaxMin}, b, a) = ldiv_alg(MaxMin, a, b)
 
-leq_alg(::Type{MaxMin}, b, a) = a <= b
-lt_alg(::Type{MaxMin}, b, a) = a < b
+leq_alg(::Type{MaxMin}, a, b) = a <= b
+lt_alg(::Type{MaxMin}, a, b) = a < b
 
 add_fast_alg(::Type{MaxMin}, a, b) = Base.FastMath.max_fast(a, b)
 mul_fast_alg(::Type{MaxMin}, a, b) = Base.FastMath.min_fast(a, b)

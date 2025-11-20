@@ -65,7 +65,7 @@ one_alg(::Type{MaxPlus}, ::Type{T}) where {T} = zero(T)
 #
 ldiv_alg(::Type{MaxPlus}, a, b) = b - a
 
-function ldiv_alg(::Type{MaxPlus}, b::T, a::T) where {T <: Rational}
+function ldiv_alg(::Type{MaxPlus}, a::T, b::T) where {T <: Rational}
     ⊤ = typemax(T)
     ⊥ = typemin(T)
 
