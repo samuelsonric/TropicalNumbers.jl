@@ -42,8 +42,7 @@ mul_alg(::Type{T}, a, b) where {T <: AbstractSemiringAlgebra}
     mul_fast_alg(::Type{T}, a, b) where {T <: AbstractSemiringAlgebra}
 """
 function mul_fast_alg(::Type{T}, a, b) where {T <: AbstractSemiringAlgebra}
-    c = mul_alg(T, a, b)
-    return c
+    return mul_alg(T, a, b)
 end
 
 """
@@ -71,8 +70,7 @@ inf_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
     inf_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
 """
 function inf_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
-    c = inf_alg(T, a, b)
-    return c
+    return inf_alg(T, a, b)
 end
 
 """
@@ -84,8 +82,7 @@ ldiv_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
     ldiv_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
 """
 function ldiv_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
-    c = ldiv_alg(T, a, b)
-    return c
+    return ldiv_alg(T, a, b)
 end
 
 """
@@ -104,8 +101,7 @@ rdiv_alg(::Type{T}, b, a) where {T <: AbstractQuantaleAlgebra}
     rdiv_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
 """
 function rdiv_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
-    c = rdiv_alg(T, a, b)
-    return c
+    return rdiv_alg(T, a, b)
 end
 
 """
