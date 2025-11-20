@@ -1,5 +1,7 @@
+struct MaxPlus <: AbstractTropicalAlgebra end
+
 """
-    TropicalMaxPlus{T} = Tropical{T} <: AbstractIdempotentSemiring{T}
+    TropicalMaxPlus{T} = Tropical{T} <: AbstractSemiring
 
 TropicalMaxPlus is a semiring algebra, can be described by
 * Tropical (TropicalMaxPlus), (ℝ, max, +, -Inf, 0).
@@ -14,80 +16,82 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxPlus(1.0) + TropicalMaxPlus(3.0)
-3.0ₜ
+3.0
 
 julia> TropicalMaxPlus(1.0) * TropicalMaxPlus(3.0)
-4.0ₜ
+4.0
 
 julia> one(TropicalMaxPlusF64)
-0.0ₜ
+0.0
 
 julia> zero(TropicalMaxPlusF64)
--Infₜ
+-Inf
 ```
 """
-struct Tropical{T} <: AbstractIdempotentSemiring{T}
-    n::T
-    Tropical{T}(x) where T = new{T}(T(x))
-    function Tropical(x::T) where T
-        new{T}(x)
-    end
-    function Tropical{T}(x::Tropical{T}) where T
-        x
-    end
-    function Tropical{T1}(x::Tropical{T2}) where {T1,T2}
-        new{T1}(T2(x.n))
-    end
-end
+const Tropical = Semiring{MaxPlus}
+const TropicalMaxPlus = Tropical
 
-content(a::Tropical) = a.n
-
-Base.:^(a::Tropical, b::Real) = Tropical(a.n * b)
-Base.:^(a::Tropical, b::Integer) = Tropical(a.n * b)
+add_alg(::Type{MaxPlus}, a, b) = max(a, b)
+inf_alg(::Type{MaxPlus}, a, b) = min(a, b)
 
 #
 #   -Inf +  Inf = -Inf
 #    Inf + -Inf = -Inf
 #
-Base.:*(a::Tropical, b::Tropical) = Tropical(a.n + b.n)
+mul_alg(::Type{MaxPlus}, a, b) = a + b
+exp_alg(::Type{MaxPlus}, a, b) = a * b
+inv_alg(::Type{MaxPlus}, a) = -a
 
-function Base.:*(a::T, b::T) where {T <: Tropical{<:Rational}}
-    if a == typemin(T) && b == typemax(T) || a == typemax(T) && b == typemin(T)
-        c = typemin(T)
+function mul_alg(::Type{MaxPlus}, a::T, b::T) where {T <: Rational}
+    ⊤ = typemax(T)
+    ⊥ = typemin(T)
+
+    if a == ⊥ && b == ⊤ || a == ⊤ && b == ⊥
+        c = ⊥
     else
-        c = Tropical(a.n + b.n)
+        c = a + b
     end
 
     return c
 end
 
-inf(a::Tropical, b::Tropical) = Tropical(min(a.n, b.n))
-sup(a::Tropical, b::Tropical) = Tropical(max(a.n, b.n))
-Base.typemin(::Type{Tropical{T}}) where {T} = Tropical(neginf(T))
-Base.typemax(::Type{Tropical{T}}) where {T} = Tropical(posinf(T))
-Base.one(::Type{Tropical{T}}) where T = Tropical(zero(T))
-
-# inverse and division
-#Base.inv(x::Tropical) = Tropical(-x.n)
+zero_alg(::Type{MaxPlus}, ::Type{T}) where {T} = neginf(T)
+typemax_alg(::Type{MaxPlus}, ::Type{T}) where {T} = posinf(T)
+one_alg(::Type{MaxPlus}, ::Type{T}) where {T} = zero(T)
 
 #
 #    Inf -  Inf =  Inf
 #   -Inf - -Inf =  Inf
 #
-Base.:\(y::Tropical, x::Tropical) = x / y
-Base.:/(x::Tropical, y::Tropical) = Tropical(x.n - y.n)
+ldiv_alg(::Type{MaxPlus}, a, b) = b - a
 
-function Base.:/(b::T, a::T) where {T <: Tropical{<:Rational}}
-    if a == b == typemin(T) || a == b == typemax(T) 
-        c = typemax(T)
+function ldiv_alg(::Type{MaxPlus}, b::T, a::T) where {T <: Rational}
+    ⊤ = typemax(T)
+    ⊥ = typemin(T)
+
+    if a == b == ⊥ || a == b == ⊤
+        c = ⊤
     else
-        c = Tropical(b.n - a.n)
+        c = b - a
     end
 
     return c
 end
 
-Base.div(x::Tropical, y::Tropical) = x / y
+rdiv_alg(::Type{MaxPlus}, b, a) = ldiv_alg(MaxPlus, a, b)
 
-# promotion rules
-Base.promote_rule(::Type{Tropical{T1}}, b::Type{Tropical{T2}}) where {T1, T2} = Tropical{promote_type(T1,T2)}
+leq_alg(::Type{MaxPlus}, a, b) = a <= b
+lt_alg(::Type{MaxPlus}, a, b) = a < b
+
+add_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.max_fast(a, b)
+mul_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.add_fast(a, b)
+ldiv_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.sub_fast(b, a)
+rdiv_fast_alg(::Type{MaxPlus}, b, a) = ldiv_fast_alg(MaxPlus, a, b)
+
+# --------------- #
+# other operators #
+# --------------- #
+
+function Base.isless(a::Tropical, b::Tropical)
+    return a < b
+end

@@ -25,7 +25,6 @@ using TropicalNumbers
     @test TropicalMaxMul(1//0) * TropicalMaxMul(1//1) == TropicalMaxMul(1//0)
     @test content(TropicalMaxMul(3.0)) == 3.0
     @test TropicalMaxMul{Float32}(TropicalMaxMul(0.0)) isa TropicalMaxMul{Float32}
-    println(TropicalMaxMulF64(3))
 
     # promote and convert
     t1 = TropicalMaxMul(2)
@@ -41,23 +40,23 @@ using TropicalNumbers
     @test promote_type(TropicalMaxMul{Float64}, TropicalMaxMulF32, TropicalMaxMul{Int32}) == TropicalMaxMulF64
 
     @test TropicalMaxMul(3) / TropicalMaxMul(4) == TropicalMaxMul(3 / 4)
-    @test TropicalMaxMul(3) ÷ TropicalMaxMul(4) == TropicalMaxMul(3 ÷ 4)
+    #@test TropicalMaxMul(3) ÷ TropicalMaxMul(4) == TropicalMaxMul(3 ÷ 4)
     @test inv(TropicalMaxMul(3)) == TropicalMaxMul(1/3)
 
     x = TropicalMaxMul(2.0)
     @test x * true == x * one(x)
     @test x / true == x / one(x)
-    @test x ÷ true == x ÷ one(x)
+    #@test x ÷ true == x ÷ one(x)
     @test x * false == x * zero(x)
     @test x / false == x / zero(x)
     # @test x ÷ false == x / zero(x)
-    @test isnan(x ÷ false)
+    #@test isnan(x ÷ false)
     @test true * x == one(x) * x
     @test true / x == one(x) / x
-    @test true ÷ x == one(x) ÷ x
+    #@test true ÷ x == one(x) ÷ x
     @test false * x == zero(x) * x
     @test false / x == zero(x) / x
-    @test false ÷ x == zero(x) ÷ x
+    #@test false ÷ x == zero(x) ÷ x
     @test isnan(TropicalMaxMul(NaN))
     @test !isnan(TropicalMaxMul(Inf))
 

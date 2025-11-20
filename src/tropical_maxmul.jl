@@ -1,4 +1,4 @@
-
+struct MaxMul <: AbstractTropicalAlgebra end
 
 """
     TropicalMaxMul{T} <: AbstractIdempotentSemiring{T}
@@ -16,82 +16,81 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxMul(1.0) + TropicalMaxMul(3.0)
-3.0ₓ
+3.0
 
 julia> TropicalMaxMul(1.0) * TropicalMaxMul(3.0)
-3.0ₓ
+3.0
 
 julia> one(TropicalMaxMulF64)
-1.0ₓ
+1.0
 
 julia> zero(TropicalMaxMulF64)
-0.0ₓ
+0.0
 ```
 """
-struct TropicalMaxMul{T} <: AbstractIdempotentSemiring{T}
-    n::T
-    function TropicalMaxMul{T}(x) where T 
-        new{T}(T(x))
-    end
-    function TropicalMaxMul(x::T) where T
-        new{T}(x)
-    end
-    function TropicalMaxMul{T}(x::TropicalMaxMul{T}) where T
-        x
-    end
-    function TropicalMaxMul{T1}(x::TropicalMaxMul{T2}) where {T1,T2}
-        new{T1}(T2(x.n))
-    end
-end
+const TropicalMaxMul = Semiring{MaxMul}
 
-content(a::TropicalMaxMul) = a.n
-
-Base.:^(a::TropicalMaxMul, b::Real) = TropicalMaxMul(a.n ^ b)
-Base.:^(a::TropicalMaxMul, b::Integer) = TropicalMaxMul(a.n ^ b)
+add_alg(::Type{MaxMul}, a, b) = max(a, b)
+inf_alg(::Type{MaxMul}, a, b) = min(a, b)
 
 #
 #    0   * Inf = 0
 #    Inf * 0   = 0
 #
-Base.:*(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(a.n * b.n)
+mul_alg(::Type{MaxMul}, a, b) = a * b
+exp_alg(::Type{MaxMul}, a, b) = a ^ b
+inv_alg(::Type{MaxMul}, a) = inv(a)
 
-function Base.:*(a::T, b::T) where {T <: TropicalMaxMul{<:Rational}}
-    if a == typemin(T) && b == typemax(T) || a == typemax(T) && b == typemin(T)
-        c = typemin(T)
+function mul_alg(::Type{MaxMul}, a::T, b::T) where {T <: Rational}
+    ⊤ = typemax(T)
+    ⊥ = zero(T)
+
+    if a == ⊥ && b == ⊤ || a == ⊤ && b == ⊥
+        c = ⊥
     else
-        c = Tropical(a.n + b.n)
+        c = a * b
     end
 
     return c
 end
 
-inf(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(min(a.n, b.n))
-sup(a::TropicalMaxMul, b::TropicalMaxMul) = TropicalMaxMul(max(a.n, b.n))
-Base.typemin(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(neginf(T))
-Base.typemax(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(posinf(T))
-Base.one(::Type{TropicalMaxMul{T}}) where T = TropicalMaxMul(one(T))
-
-# inverse and division
-#Base.inv(x::TropicalMaxMul) = TropicalMaxMul(inv(x.n))
+zero_alg(::Type{MaxMul}, ::Type{T}) where {T} = zero(T)
+typemax_alg(::Type{MaxMul}, ::Type{T}) where {T} = posinf(T)
+one_alg(::Type{MaxMul}, ::Type{T}) where {T} = one(T)
 
 #
 #   Inf / Inf = Inf
 #   0   / 0   = Inf
 #
-Base.:\(y::TropicalMaxMul, x::TropicalMaxMul) = x / y
-Base.:/(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(x.n / y.n)
+ldiv_alg(::Type{MaxMul}, a, b) = b / a
 
-function Base.:/(b::T, a::T) where {T <: TropicalMaxMul{<:Rational}}
-    if a == b == typemin(T) || a == b == typemax(T)
-        c = typemax(T)
+function ldiv_alg(::Type{MaxMul}, b::T, a::T) where {T <: Rational}
+    ⊤ = typemax(T)
+    ⊥ = zero(T)
+
+    if a == b == ⊥ || a == b == ⊤
+        c = ⊤
     else
-        c = Tropical(b.n - a.n)
+        c = b / a
     end
 
     return c
 end
 
-Base.div(x::TropicalMaxMul, y::TropicalMaxMul) = TropicalMaxMul(div(x.n, y.n))
+rdiv_alg(::Type{MaxMul}, b, a) = ldiv_alg(MaxMul, a, b)
 
-# promotion rules
-Base.promote_rule(::Type{TropicalMaxMul{T1}}, b::Type{TropicalMaxMul{T2}}) where {T1, T2} = TropicalMaxMul{promote_type(T1,T2)}
+leq_alg(::Type{MaxMul}, a, b) = a <= b
+lt_alg(::Type{MaxMul}, a, b) = a < b
+
+add_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.max_fast(a, b)
+mul_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.mul_fast(a, b)
+ldiv_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.div_fast(b, a)
+rdiv_fast_alg(::Type{MaxMul}, b, a) = ldiv_fast_alg(MaxMul, a, b)
+
+# --------------- #
+# other operators #
+# --------------- #
+
+function Base.isless(a::TropicalMaxMul, b::TropicalMaxMul)
+    return a < b
+end

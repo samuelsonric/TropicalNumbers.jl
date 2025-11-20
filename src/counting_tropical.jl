@@ -1,5 +1,5 @@
 """
-    CountingTropical{T,CT} <: AbstractSemiring{T}
+    CountingTropical{T,CT} <: AbstractSemiring
 
 Counting tropical number type is also a semiring algebra.
 It is tropical algebra with one extra field for counting, it is introduced in [arXiv:2008.06888](https://arxiv.org/abs/2008.06888).
@@ -8,19 +8,19 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> CountingTropical(1.0, 5.0) + CountingTropical(3.0, 2.0)
-(3.0, 2.0)ₜ
+(3.0, 2.0)
 
 julia> CountingTropical(1.0, 5.0) * CountingTropical(3.0, 2.0)
-(4.0, 10.0)ₜ
+(4.0, 10.0)
 
 julia> one(CountingTropicalF64)
-(0.0, 1.0)ₜ
+(0.0, 1.0)
 
 julia> zero(CountingTropicalF64)
-(-Inf, 0.0)ₜ
+(-Inf, 0.0)
 ```
 """
-struct CountingTropical{T,CT} <: AbstractSemiring{T}
+struct CountingTropical{T,CT} <: AbstractSemiring
     n::T
     c::CT
 end
@@ -58,6 +58,12 @@ Base.one(::Type{CountingTropical{T,CT}}) where {T<:Integer,CT} = CountingTropica
 Base.one(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = CountingTropical(zero(T), one(CT))
 Base.isapprox(a::CountingTropical, b::CountingTropical; kwargs...) = isapprox(a.n, b.n; kwargs...) && isapprox(a.c, b.c; kwargs...)
 
-Base.show(io::IO, t::CountingTropical) = Base.print(io, "$((t.n, t.c))s")
+Base.show(io::IO, t::CountingTropical) = Base.print(io, (t.n, t.c))
 
 Base.promote_rule(::Type{CountingTropical{T1,CT1}}, b::Type{CountingTropical{T2,CT2}}) where {T1,T2,CT1,CT2} = CountingTropical{promote_type(T1,T2), promote_type(CT1,CT2)}
+
+Base.isnan(a::CountingTropical) = isnan(a.n)
+Base.isinf(a::CountingTropical) = isinf(a.n)
+Base.:(==)(a::CountingTropical, b::CountingTropical) = a.n == b.n
+Base.:<=(a::CountingTropical, b::CountingTropical) = a.n <= b.n
+Base.:<(a::CountingTropical, b::CountingTropical) = a.n < b.n

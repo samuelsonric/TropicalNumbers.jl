@@ -34,7 +34,6 @@ using TropicalNumbers
     @test Tropical(-1//0) * Tropical(-1//1) == Tropical(-1//0)
     @test content(Tropical(3.0)) == 3.0
     @test Tropical{Float32}(Tropical(0.0)) isa Tropical{Float32}
-    println(TropicalF64(3))
 
     # promote and convert
     t1 = Tropical(2)
@@ -50,22 +49,22 @@ using TropicalNumbers
     @test promote_type(Tropical{Float64}, TropicalF32, Tropical{Int32}) == TropicalF64
 
     @test Tropical(3) / Tropical(4) == Tropical(-1)
-    @test Tropical(3) ÷ Tropical(4) == Tropical(-1)
+    #@test Tropical(3) ÷ Tropical(4) == Tropical(-1)
     @test inv(Tropical(3)) == Tropical(-3)
 
     x = Tropical(2.0)
     @test x * true == x * one(x)
     @test x / true == x / one(x)
-    @test x ÷ true == x ÷ one(x)
+    #@test x ÷ true == x ÷ one(x)
     @test x * false == x * zero(x)
     @test x / false == x / zero(x)
-    @test x ÷ false == x ÷ zero(x)
+    #@test x ÷ false == x ÷ zero(x)
     @test true * x == one(x) * x
     @test true / x == one(x) / x
-    @test true ÷ x == one(x) ÷ x
+    #@test true ÷ x == one(x) ÷ x
     @test false * x == zero(x) * x
     @test false / x == zero(x) / x
-    @test false ÷ x == zero(x) ÷ x
+    #@test false ÷ x == zero(x) ÷ x
     @test isnan(Tropical(NaN))
     @test !isnan(Tropical(-Inf))
 

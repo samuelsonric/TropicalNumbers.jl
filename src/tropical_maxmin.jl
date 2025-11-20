@@ -1,5 +1,7 @@
+struct MaxMin <: AbstractLatticeAlgebra end
+
 """
-    TropicalMaxMin{T} <: AbstractSimpleSemiring{T}
+    TropicalMaxMin{T} <: AbstractSemiring
 
 TropicalMaxMin is a semiring algebra, can be described by
 * TropicalMaxMin, (ℝ, max, min, -Inf, Inf).
@@ -14,67 +16,39 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxMin(1.0) + TropicalMaxMin(3.0)
-3.0ₛ
+3.0
 
 julia> TropicalMaxMin(1.0) * TropicalMaxMin(3.0)
-1.0ₛ
+1.0
 
 julia> zero(TropicalMaxMinF64)
--Infₛ
+-Inf
 
 julia> one(TropicalMaxMinF64)
-Infₛ
+Inf
 ```
 """
-struct TropicalMaxMin{T} <: AbstractSimpleSemiring{T}
-    n::T
-end
+const TropicalMaxMin = Semiring{MaxMin}
 
-function TropicalMaxMin(a::TropicalMaxMin)
-    return TropicalMaxMin(a.n)
-end
+add_alg(::Type{MaxMin}, a, b) = max(a, b)
+mul_alg(::Type{MaxMin}, a, b) = min(a, b)
 
-function TropicalMaxMin{T}(a::TropicalMaxMin) where {T}
-    return TropicalMaxMin{T}(a.n)
-end
+zero_alg(::Type{MaxMin}, ::Type{T}) where {T} = neginf(T)
+one_alg(::Type{MaxMin}, ::Type{T}) where {T} = posinf(T)
 
-function Base.promote_rule(::Type{TropicalMaxMin{U}}, ::Type{TropicalMaxMin{V}}) where {U, V}
-    W = promote_type(U, V)
-    return TropicalMaxMin{W}
-end
+ldiv_alg(::Type{MaxMin}, a, b) = a <= b ? typemax(b) : b
+rdiv_alg(::Type{MaxMin}, b, a) = ldiv_alg(MaxMin, a, b)
 
-function content(a::TropicalMaxMin)
-    return a.n
-end
+leq_alg(::Type{MaxMin}, b, a) = a <= b
+lt_alg(::Type{MaxMin}, b, a) = a < b
 
-function inf(a::TropicalMaxMin, b::TropicalMaxMin)
-    n = min(a.n, b.n)
-    return TropicalMaxMin(n)
-end
+add_fast_alg(::Type{MaxMin}, a, b) = Base.FastMath.max_fast(a, b)
+mul_fast_alg(::Type{MaxMin}, a, b) = Base.FastMath.min_fast(a, b)
 
-function sup(a::TropicalMaxMin, b::TropicalMaxMin)
-    n = max(a.n, b.n)
-    return TropicalMaxMin(n)
-end
+# --------------- #
+# other operators #
+# --------------- #
 
-function Base.typemin(::Type{TropicalMaxMin{T}}) where {T}
-    n = neginf(T)
-    return TropicalMaxMin(n)
-end
-
-function Base.typemax(::Type{TropicalMaxMin{T}}) where {T}
-    n = posinf(T)
-    return TropicalMaxMin(n)
-end
-
-function Base.:\(a::TropicalMaxMin, b::TropicalMaxMin)
-    return b / a
-end
-
-function Base.:/(b::TropicalMaxMin, a::TropicalMaxMin)
-    return a <= b ? typemax(b) : b
-end
-
-function Base.:div(b::TropicalMaxMin, a::TropicalMaxMin)
-    return b / a
+function Base.isless(a::TropicalMaxMin, b::TropicalMaxMin)
+    return a < b
 end

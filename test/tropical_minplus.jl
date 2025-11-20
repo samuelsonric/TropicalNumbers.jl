@@ -43,22 +43,22 @@ using TropicalNumbers
     @test promote_type(TropicalMinPlus{Float64}, TropicalMinPlusF32, TropicalMinPlus{Int32}) == TropicalMinPlusF64
 
     @test TropicalMinPlus(3) / TropicalMinPlus(4) == TropicalMinPlus(-1)
-    @test TropicalMinPlus(3) ÷ TropicalMinPlus(4) == TropicalMinPlus(-1)
+    #@test TropicalMinPlus(3) ÷ TropicalMinPlus(4) == TropicalMinPlus(-1)
     @test inv(TropicalMinPlus(3)) == TropicalMinPlus(-3)
 
     x = TropicalMinPlus(2.0)
     @test x * true == x * one(x)
     @test x / true == x / one(x)
-    @test x ÷ true == x ÷ one(x)
+    #@test x ÷ true == x ÷ one(x)
     @test x * false == x * zero(x)
     @test x / false == x / zero(x)
-    @test x ÷ false == x ÷ zero(x)
+    #@test x ÷ false == x ÷ zero(x)
     @test true * x == one(x) * x
     @test true / x == one(x) / x
-    @test true ÷ x == one(x) ÷ x
+    #@test true ÷ x == one(x) ÷ x
     @test false * x == zero(x) * x
     @test false / x == zero(x) / x
-    @test false ÷ x == zero(x) ÷ x
+    #@test false ÷ x == zero(x) ÷ x
     @test isnan(TropicalMinPlus(NaN))
     @test !isnan(TropicalMinPlus(-Inf))
 

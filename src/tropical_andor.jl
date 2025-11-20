@@ -1,7 +1,7 @@
-
+struct AndOr <: AbstractLatticeAlgebra end
 
 """
-    TropicalAndOr <: AbstractSimpleSemiring{Bool}
+    TropicalAndOr <: AbstractSemiring
 
 TropicalAndOr is a semiring algebra, can be described by
 * TropicalAndOr, ([T, F], or, and, false, true).
@@ -18,34 +18,36 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalAndOr(true) + TropicalAndOr(false)
-trueₜ
+true
 
 julia> TropicalAndOr(true) * TropicalAndOr(false)
-falseₜ
+false
 
 julia> one(TropicalAndOr)
-trueₜ
+true
 
 julia> zero(TropicalAndOr)
-falseₜ
+false
 ```
 """
-struct TropicalAndOr <: AbstractSimpleSemiring{Bool}
-    n::Bool
-    TropicalAndOr(x::T) where T <: Bool = new(x)
+const TropicalAndOr = Semiring{AndOr, Bool}
+
+add_alg(::Type{AndOr}, a::Bool, b::Bool) = a || b
+mul_alg(::Type{AndOr}, a::Bool, b::Bool) = a && b
+
+zero_alg(::Type{AndOr}, ::Type{Bool}) = false
+one_alg(::Type{AndOr}, ::Type{Bool}) = true
+
+ldiv_alg(::Type{AndOr}, a::Bool, b::Bool) = b || !a
+rdiv_alg(::Type{AndOr}, b::Bool, a::Bool) = ldiv_alg(AndOr, a, b)
+
+leq_alg(::Type{AndOr}, a::Bool, b::Bool) = a <= b
+lt_alg(::Type{AndOr}, a::Bool, b::Bool) = a < b
+
+# --------------- #
+# other operators #
+# --------------- #
+
+function Base.isless(a::TropicalAndOr, b::TropicalAndOr)
+    return a < b
 end
-
-content(a::TropicalAndOr) = a.n
-
-inf(a::TropicalAndOr, b::TropicalAndOr) = TropicalAndOr(a.n && b.n)
-sup(a::TropicalAndOr, b::TropicalAndOr) = TropicalAndOr(a.n || b.n)
-
-Base.typemin(::Type{TropicalAndOr}) = TropicalAndOr(false)
-Base.typemax(::Type{TropicalAndOr}) = TropicalAndOr(true)
-
-Base.:\(a::TropicalAndOr, b::TropicalAndOr) = b / a
-Base.:/(b::TropicalAndOr, a::TropicalAndOr) = TropicalAndOr(b.n || !a.n)
-Base.div(b::TropicalAndOr, a::TropicalAndOr) = b / a
-
-# Base.inv(a::TropicalAndOr) = TropicalAndOr(!a.n)
-# invint(a::TropicalAndOr) = inv(a)

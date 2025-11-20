@@ -1,6 +1,6 @@
 module TropicalNumbers
 
-export content, neginf, posinf, sup, inf
+export content, neginf, posinf, inf, fli, fri, inf_fast, ldiv_fast, rdiv_fast, ∧
 export TropicalTypes, AbstractSemiring
 
 export TropicalAndOr
@@ -13,13 +13,12 @@ export TropicalBitwise, TropicalBitwiseI64, TropicalBitwiseI32, TropicalBitwiseI
 export CountingTropical, CountingTropicalF16, CountingTropicalF32, CountingTropicalF64, CountingTropicalI16, CountingTropicalI32, CountingTropicalI64
 
 neginf(::Type{T}) where T = typemin(T)
-neginf(::Type{T}) where T<:AbstractFloat = typemin(T)
-neginf(::Type{T}) where T<:Rational = typemin(T)
 neginf(::Type{T}) where T<:Integer = T(-999999)
 neginf(::Type{Int16}) = Int16(-16384)
 neginf(::Type{Int8}) = Int8(-64)
 posinf(::Type{T}) where T = -neginf(T)
 
+include("abstract_semiring_algebra.jl")
 include("abstract_semiring.jl")
 include("tropical_maxplus.jl")
 include("tropical_andor.jl")
@@ -30,7 +29,7 @@ include("tropical_bitwise.jl")
 include("counting_tropical.jl")
 
 const TropicalTypes{T} = Union{CountingTropical{T}, Tropical{T}}
-const TropicalMaxPlus = Tropical
+const ∧ = inf
 
 # alias
 # defining constants like `TropicalF64`.

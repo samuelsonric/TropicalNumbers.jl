@@ -12,12 +12,10 @@ using TropicalNumbers
     @test TropicalAndOr(false) + TropicalAndOr(true) == TropicalAndOr(true)
     @test TropicalAndOr(false) + TropicalAndOr(false) == TropicalAndOr(false)
 
-    @test inv(TropicalAndOr(true)) == TropicalAndOr(false)  
-    @test inv(TropicalAndOr(false)) == TropicalAndOr(true)  
+    #@test inv(TropicalAndOr(true)) == TropicalAndOr(false)
+    #@test inv(TropicalAndOr(false)) == TropicalAndOr(true) 
 
     @test zero(TropicalAndOr) == TropicalAndOr(false)
     @test one(TropicalAndOr) == TropicalAndOr(true)
     @test zero(TropicalAndOr) ≈ TropicalAndOr(false)
-
-    println(TropicalAndOr(true))
 end

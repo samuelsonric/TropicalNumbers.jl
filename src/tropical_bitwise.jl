@@ -1,7 +1,9 @@
-"""
-    TropicalBitwise{T} <: AbstractSimpleSemiring{T}
+struct Bitwise <: AbstractLatticeAlgebra end
 
-`TropicalBitwise` is a semiring algebra that parallelizes the [`TropicalAndOr`](@ref) algebra,
+"""
+    TropicalBitwise{T} <: AbstractSemiring
+
+`TropicalBitwise` is a semiring algebra that parallelizes the [`TropicalBitwise`](@ref) algebra,
 It can be described by
 * TropicalBitwise, (ℝ, |, &, 0, ~0).
 
@@ -15,67 +17,25 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalBitwise(1) + TropicalBitwise(3)
-3ₛ
+3
 
 julia> TropicalBitwise(1) * TropicalBitwise(3)
-1ₛ
+1
 
 julia> zero(TropicalBitwiseI64)
-0ₛ
+0
 
 julia> one(TropicalBitwiseI64)
--1ₛ
+-1
 ```
 """
-struct TropicalBitwise{T} <: AbstractSimpleSemiring{T}
-    n::T
-end
+const TropicalBitwise = Semiring{Bitwise}
 
-function TropicalBitwise(a::TropicalBitwise)
-    return TropicalBitwise(a.n)
-end
+add_alg(::Type{Bitwise}, a, b) = a | b
+mul_alg(::Type{Bitwise}, a, b) = a & b
 
-function TropicalBitwise{T}(a::TropicalBitwise) where {T}
-    return TropicalBitwise{T}(a.n)
-end
+zero_alg(::Type{Bitwise}, ::Type{T}) where {T} = zero(T)
+one_alg(::Type{Bitwise}, ::Type{T}) where {T} = ~zero(T)
 
-function Base.promote_rule(::Type{TropicalBitwise{U}}, ::Type{TropicalBitwise{V}}) where {U, V}
-    W = promote_type(U, V)
-    return TropicalBitwise{W}
-end
-
-function content(a::TropicalBitwise)
-    return a.n
-end
-
-function inf(a::TropicalBitwise, b::TropicalBitwise)
-    n = a.n & b.n
-    return TropicalBitwise(n)
-end
-
-function sup(a::TropicalBitwise, b::TropicalBitwise)
-    n = a.n | b.n
-    return TropicalBitwise(n)
-end
-
-function Base.typemin(::Type{TropicalBitwise{T}}) where {T}
-    n = zero(T)
-    return TropicalBitwise(n)
-end
-
-function Base.typemax(::Type{TropicalBitwise{T}}) where {T}
-    n = ~zero(T)
-    return TropicalBitwise(n)
-end
-
-function Base.:\(a::TropicalBitwise, b::TropicalBitwise)
-    return b / a
-end
-
-function Base.:/(b::TropicalBitwise, a::TropicalBitwise)
-    return TropicalBitwise(b.n | ~a.n)
-end
-
-function Base.div(b::TropicalBitwise, a::TropicalBitwise)
-    return b / a
-end
+ldiv_alg(::Type{Bitwise}, a, b) = b | ~a
+rdiv_alg(::Type{Bitwise}, b, a) = ldiv_alg(Bitwise, a, b)
