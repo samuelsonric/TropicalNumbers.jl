@@ -3,7 +3,7 @@ module TropicalNumbers
 using Random
 using Random: SamplerType
 
-export content, neginf, posinf, inf, fli, fri, inf_fast, ldiv_fast, rdiv_fast, ∧
+export content, neginf, posinf, inf, fli, fri, inf_fast, ldiv_fast, ∧
 export TropicalTypes, AbstractSemiring
 
 export TropicalAndOr
