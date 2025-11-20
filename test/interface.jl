@@ -70,7 +70,40 @@ function test_fast(a::T, b::T, c::T) where {T <: AbstractSemiring}
     @test (a / b) ∧ c ≈ fri(a, b, c)
 end
 
+function test_isless(a::T, b::T) where {T <: AbstractSemiring}
+    @test isless(a, b) == (a < b)
+end
+
 @testset "interface" begin
+    types = (
+        TropicalMinPlusF64,
+        TropicalMaxPlusF64,
+        TropicalMaxMulF64,
+        TropicalAndOr,
+        TropicalMaxMinF64,
+    )
+
+    for T in types
+        a = rand(T)
+        b = rand(T)
+
+        test_isless(a, b)
+        test_isless(a, a)
+        test_isless(a, zero(T))
+        test_isless(a, typemax(T))
+    end
+
+    for T in types
+        a = rand(T)
+        b = rand(T)
+        c = rand(T)
+
+        test_fast(a, b, c)
+        test_quantale(a, b, c)
+        test_quantale(zero(T), b, c)
+    end
+
+
     types = (
         TropicalMinPlusF64,
         TropicalMaxPlusF64,
@@ -104,6 +137,9 @@ end
         test_fast(T(a), T(b), T(c))
         test_quantale(T(a), T(b), T(c))
         test_quantale(zero(T), T(b), T(c))
+        test_quantale(T(a), zero(T), zero(T))
         test_quantale(typemax(T), T(b), T(c))
+        test_quantale(typemax(T), zero(T), T(c))
+        test_quantale(typemax(T), T(b), typemax(T))
     end
 end
