@@ -38,8 +38,6 @@ inf_alg(::Type{MaxMul}, a, b) = min(a, b)
 #    Inf * 0   = 0
 #
 mul_alg(::Type{MaxMul}, a, b) = a * b
-exp_alg(::Type{MaxMul}, a, b) = a ^ b
-inv_alg(::Type{MaxMul}, a) = inv(a)
 
 function mul_alg(::Type{MaxMul}, a::T, b::T) where {T <: Rational}
     ⊤ = typemax(T)
@@ -53,6 +51,9 @@ function mul_alg(::Type{MaxMul}, a::T, b::T) where {T <: Rational}
 
     return c
 end
+
+exp_alg(::Type{MaxMul}, a, b) = a ^ b
+inv_alg(::Type{MaxMul}, a) = inv(a)
 
 zero_alg(::Type{MaxMul}, ::Type{T}) where {T} = zero(T)
 typemax_alg(::Type{MaxMul}, ::Type{T}) where {T} = posinf(T)
@@ -77,15 +78,13 @@ function ldiv_alg(::Type{MaxMul}, a::T, b::T) where {T <: Rational}
     return c
 end
 
-rdiv_alg(::Type{MaxMul}, b, a) = ldiv_alg(MaxMul, a, b)
-
 leq_alg(::Type{MaxMul}, a, b) = a <= b
 lt_alg(::Type{MaxMul}, a, b) = a < b
 
 add_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.max_fast(a, b)
 mul_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.mul_fast(a, b)
+inf_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.min_fast(a, b)
 ldiv_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.div_fast(b, a)
-rdiv_fast_alg(::Type{MaxMul}, b, a) = ldiv_fast_alg(MaxMul, a, b)
 
 # --------------- #
 # other operators #

@@ -34,12 +34,12 @@ const TropicalAndOr = TropicalBitwise{Bool}
 
 add_alg(::Type{Bitwise}, a, b) = a | b
 mul_alg(::Type{Bitwise}, a, b) = a & b
+not_alg(::Type{Bitwise}, a) = ~a
 
 zero_alg(::Type{Bitwise}, ::Type{T}) where {T} = zero(T)
 one_alg(::Type{Bitwise}, ::Type{T}) where {T} = ~zero(T)
 
 ldiv_alg(::Type{Bitwise}, a, b) = b | ~a
-rdiv_alg(::Type{Bitwise}, b, a) = ldiv_alg(Bitwise, a, b)
 
 # --------------- #
 # other operators #

@@ -77,15 +77,13 @@ function ldiv_alg(::Type{MinPlus}, a::T, b::T) where {T <: Rational}
     return c
 end
 
-rdiv_alg(::Type{MinPlus}, b, a) = ldiv_alg(MinPlus, a, b)
-
 leq_alg(::Type{MinPlus}, a, b) = a >= b
 lt_alg(::Type{MinPlus}, a, b) = a > b
 
 add_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.min_fast(a, b)
 mul_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.add_fast(a, b)
+inf_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.max_fast(a, b)
 ldiv_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.sub_fast(b, a)
-rdiv_fast_alg(::Type{MinPlus}, b, a) = ldiv_fast_alg(MinPlus, a, b)
 
 # --------------- #
 # other operators #

@@ -3,7 +3,7 @@ module TropicalNumbers
 using Random
 using Random: Repetition, Sampler
 
-export content, neginf, posinf, inf, fli, fri, inf_fast, ldiv_fast, ∧
+export content, neginf, posinf, inf, imp, not, fia, fli, fri, fii, inf_fast, ldiv_fast, imp_fast, ∧
 export TropicalTypes, AbstractSemiring
 
 export TropicalAndOr
@@ -26,7 +26,6 @@ include("semiring.jl")
 include("tropical_maxplus.jl")
 include("tropical_minplus.jl")
 include("tropical_maxmul.jl")
-include("tropical_maxmin.jl")
 include("tropical_bitwise.jl")
 include("counting_tropical.jl")
 

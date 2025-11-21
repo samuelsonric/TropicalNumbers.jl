@@ -56,6 +56,15 @@ function test_quantale(a::T, b::T, c::T) where {T <: AbstractSemiring}
 
     # strict ordering agrees with partial ordering
     @test (a < b) == (a != b && a <= b)
+
+    # lattice is a Heyting algebra
+    @test imp(a, a) == typemax(T)
+    @test a ∧ imp(a, b) == a ∧ b
+    @test b ∧ imp(a, b) == b
+    @test imp(a, b ∧ c) == imp(a, b) ∧ imp(a, c)
+
+    # complement agrees with implication
+    @test not(a) == imp(a, zero(T))
 end
 
 function test_fast(a::T, b::T, c::T) where {T <: AbstractSemiring}
@@ -64,10 +73,13 @@ function test_fast(a::T, b::T, c::T) where {T <: AbstractSemiring}
     @test a ∧ b ≈ inf_fast(a, b)
     @test a / b ≈ div_fast(a, b)
     @test a \ b ≈ ldiv_fast(a, b)
+    @test imp(a, b) ≈ imp_fast(a, b)
 
     @test (a * b) + c ≈ fma(a, b, c)
+    @test (a ∧ b) + c ≈ fia(a, b, c)
     @test (a \ b) ∧ c ≈ fli(a, b, c)
     @test (a / b) ∧ c ≈ fri(a, b, c)
+    @test imp(a, b) ∧ c ≈ fii(a, b, c) 
 end
 
 function test_isless(a::T, b::T) where {T <: AbstractSemiring}

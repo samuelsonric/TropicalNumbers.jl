@@ -28,8 +28,38 @@ julia> zero(TropicalMaxPlusF64)
 -Inf
 ```
 """
-const Tropical = Semiring{MaxPlus}
-const TropicalMaxPlus = Tropical
+const TropicalMaxPlus = Semiring{MaxPlus}
+const Tropical = TropicalMaxPlus
+
+"""
+    TropicalMaxMin{T} <: AbstractSemiring
+
+TropicalMaxMin is a semiring algebra, can be described by
+* TropicalMaxMin, (ℝ, max, min, -Inf, Inf).
+
+It maps
+* `+` to `max` in regular algebra,
+* `*` to `min` in regular algebra,
+* `0` to `-Inf` in regular algebra (for integer content types, this is a small integer).
+* `1` to `Inf` in regular algebra, (for integer content types, this is a large integer)
+
+Example
+-------------------------
+```jldoctest; setup=:(using TropicalNumbers)
+julia> TropicalMaxMin(1.0) + TropicalMaxMin(3.0)
+3.0
+
+julia> TropicalMaxMin(1.0) * TropicalMaxMin(3.0)
+1.0
+
+julia> zero(TropicalMaxMinF64)
+-Inf
+
+julia> one(TropicalMaxMinF64)
+Inf
+```
+"""
+const TropicalMaxMin = Semiring{LatticeAlgebra{MaxPlus}}
 
 add_alg(::Type{MaxPlus}, a, b) = max(a, b)
 inf_alg(::Type{MaxPlus}, a, b) = min(a, b)
@@ -39,8 +69,6 @@ inf_alg(::Type{MaxPlus}, a, b) = min(a, b)
 #    Inf + -Inf = -Inf
 #
 mul_alg(::Type{MaxPlus}, a, b) = a + b
-exp_alg(::Type{MaxPlus}, a, b) = a * b
-inv_alg(::Type{MaxPlus}, a) = -a
 
 function mul_alg(::Type{MaxPlus}, a::T, b::T) where {T <: Rational}
     ⊤ = typemax(T)
@@ -54,6 +82,9 @@ function mul_alg(::Type{MaxPlus}, a::T, b::T) where {T <: Rational}
 
     return c
 end
+
+exp_alg(::Type{MaxPlus}, a, b) = a * b
+inv_alg(::Type{MaxPlus}, a) = -a
 
 zero_alg(::Type{MaxPlus}, ::Type{T}) where {T} = neginf(T)
 typemax_alg(::Type{MaxPlus}, ::Type{T}) where {T} = posinf(T)
@@ -78,20 +109,22 @@ function ldiv_alg(::Type{MaxPlus}, a::T, b::T) where {T <: Rational}
     return c
 end
 
-rdiv_alg(::Type{MaxPlus}, b, a) = ldiv_alg(MaxPlus, a, b)
-
 leq_alg(::Type{MaxPlus}, a, b) = a <= b
 lt_alg(::Type{MaxPlus}, a, b) = a < b
 
 add_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.max_fast(a, b)
 mul_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.add_fast(a, b)
+inf_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.min_fast(a, b)
 ldiv_fast_alg(::Type{MaxPlus}, a, b) = Base.FastMath.sub_fast(b, a)
-rdiv_fast_alg(::Type{MaxPlus}, b, a) = ldiv_fast_alg(MaxPlus, a, b)
 
 # --------------- #
 # other operators #
 # --------------- #
 
-function Base.isless(a::Tropical, b::Tropical)
+function Base.isless(a::TropicalMaxPlus, b::TropicalMaxPlus)
+    return a < b
+end
+
+function Base.isless(a::TropicalMaxMin, b::TropicalMaxMin)
     return a < b
 end

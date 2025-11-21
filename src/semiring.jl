@@ -193,6 +193,11 @@ function inf_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAl
     return Semiring{A}(n)
 end
 
+function fia(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = inf_add_alg(A, a.n, b.n, c.n)
+    return Semiring{A}(n)
+end
+
 function Base.:\(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = ldiv_alg(A, a.n, b.n)
     return Semiring{A}(n)
@@ -243,6 +248,21 @@ function fri(b::Semiring{A}, a::Semiring{A}, c::Semiring{A}) where {A <: Abstrac
     return Semiring{A}(n)
 end
 
+function imp(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = imp_alg(A, a.n, b.n)
+    return Semiring{A}(n)
+end
+
+function imp_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = imp_fast_alg(A, a.n, b.n)
+    return Semiring{A}(n)
+end
+
+function fii(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = inf_imp_alg(A, a.n, b.n, c.n)
+    return Semiring{A}(n)
+end
+
 function Base.:<=(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     return leq_alg(A, a.n, b.n)
 end
@@ -253,6 +273,11 @@ end
 
 function Base.inv(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = inv_alg(A, a.n)
+    return Semiring{A}(n)
+end
+
+function not(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = not_alg(A, a.n)
     return Semiring{A}(n)
 end
 
