@@ -24,10 +24,10 @@ Fast semiring matrix multiplication is implemented in the following libraries.
 """
 struct Semiring{A <: AbstractSemiringAlgebra, T} <: Number
     n::T
+end
 
-    function Semiring{A, T}(n) where {A <: AbstractSemiringAlgebra, T}
-        return new{A, T}(n)
-    end
+struct SemiringSampler{A <: AbstractSemiringAlgebra, T, S <: Sampler{T}} <: Sampler{Semiring{A, T}}
+    s::S
 end
 
 const AbstractSemiring{T} = Semiring{<:AbstractSemiringAlgebra, T}
@@ -44,6 +44,10 @@ end
 
 function Semiring{A, T}(a::Semiring{A}) where {A <: AbstractSemiringAlgebra, T}
     return Semiring{A, T}(a.n)
+end
+
+function SemiringSampler{A, T}(s::S) where {A <: AbstractSemiringAlgebra, T, S <: Sampler{T}}
+    return SemiringSampler{A, T, S}(s)
 end
 
 function content(a::AbstractSemiring)
@@ -67,11 +71,6 @@ function Base.isinf(a::AbstractSemiring)
     return isinf(a.n)
 end
 
-function Base.rand(rng::AbstractRNG, sampler::SamplerType{Semiring{A, T}}) where {A <: AbstractSemiringAlgebra, T}
-    n =  rand(rng, T)
-    return Semiring{A}(n)
-end
-
 function Base.:(==)(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
     return a.n == b.n
 end
@@ -87,6 +86,20 @@ end
 function Base.promote_rule(::Type{Semiring{A, T}}, ::Type{Semiring{A, U}}) where {A <: AbstractSemiringAlgebra, T, U}
     V = promote_type(T, U)
     return Semiring{A, V}
+end
+
+# ------------------------ #
+# Random Number Generation #
+# ------------------------ #
+
+function Random.Sampler(::Type{R}, ::Type{Semiring{A, T}}, r::Repetition) where {R <: AbstractRNG, A <: AbstractSemiringAlgebra, T}
+    s = Sampler(R, T, r)
+    return SemiringSampler{A, T}(s)
+end
+
+function Base.rand(rng::AbstractRNG, s::SemiringSampler{A}) where {A <: AbstractSemiringAlgebra}
+    n =  rand(rng, s.s)
+    return Semiring{A}(n)
 end
 
 # --------- #

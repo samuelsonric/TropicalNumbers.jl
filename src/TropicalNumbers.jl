@@ -1,7 +1,7 @@
 module TropicalNumbers
 
 using Random
-using Random: SamplerType
+using Random: Repetition, Sampler
 
 export content, neginf, posinf, inf, fli, fri, inf_fast, ldiv_fast, ∧
 export TropicalTypes, AbstractSemiring
