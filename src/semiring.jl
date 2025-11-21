@@ -130,8 +130,8 @@ function Base.:*(a::T, b::Bool) where {T <: AbstractSemiring}
     return b ? a : zero(T)
 end
 
-function Base.:*(b::Bool, a::T) where {T <: AbstractSemiring}
-    return b ? a : zero(T)
+function Base.:*(a::Bool, b::T) where {T <: AbstractSemiring}
+    return b * a
 end
 
 function Base.FastMath.mul_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
@@ -235,6 +235,14 @@ end
 
 function Base.:<(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     return lt_alg(A, a.n, b.n)
+end
+
+# -------- #
+# Lattices #
+# -------- #
+
+function Base.:/(b::Bool, a::T) where {T <: AbstractLattice}
+    return b ? one(T) : zero(T)
 end
 
 # -------- #
