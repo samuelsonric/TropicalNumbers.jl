@@ -140,7 +140,7 @@ function Base.:*(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlg
 end
 
 function Base.:*(a::T, b::Bool) where {T <: AbstractSemiring}
-    return b ? a : zero(T)
+    return ifelse(b, a, zero(T))
 end
 
 function Base.:*(a::Bool, b::T) where {T <: AbstractSemiring}
@@ -221,11 +221,11 @@ function Base.:/(b::Semiring{A}, a::Semiring{A}) where {A <: AbstractQuantaleAlg
 end
 
 function Base.:/(b::T, a::Bool) where {T <: AbstractQuantale}
-     return a ? b : typemax(T)
+    return ifelse(a, b, typemax(T))
 end
 
 function Base.:/(b::Bool, a::T) where {T <: AbstractQuantale}
-    return b ? one(T) / a : zero(T)
+    return ifelse(b, one(T) / a, zero(T))
 end
 
 function Base.FastMath.div_fast(b::Semiring{A}, a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
@@ -255,7 +255,7 @@ end
 # -------- #
 
 function Base.:/(b::Bool, a::T) where {T <: AbstractLattice}
-    return b ? one(T) : zero(T)
+    return ifelse(b, one(T), zero(T))
 end
 
 # -------- #

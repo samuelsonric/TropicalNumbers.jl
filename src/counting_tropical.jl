@@ -1,5 +1,5 @@
 """
-    CountingTropical{T,CT} <: Number
+    CountingTropical{T, C} <: Number
 
 Counting tropical number type is also a semiring algebra.
 It is tropical algebra with one extra field for counting, it is introduced in [arXiv:2008.06888](https://arxiv.org/abs/2008.06888).
@@ -20,49 +20,52 @@ julia> zero(CountingTropicalF64)
 (-Inf, 0.0)
 ```
 """
-struct CountingTropical{T,CT} <: Number
+struct CountingTropical{T,C} <: Number
     n::T
-    c::CT
+    c::C
 end
-CountingTropical(x::T) where T<:Real = CountingTropical(x, one(T))
-CountingTropical{T1}(x) where {T1} = CountingTropical{T1,T1}(x)
-
-CountingTropical{T1,CT1}(x) where {T1, CT1} = CountingTropical{T1,CT1}(T1(x), one(CT1))
-CountingTropical{T1,CT1}(x::CountingTropical{T1,CT1}) where {T1,CT1} = x
-CountingTropical{T1,CT1}(x::CountingTropical) where {T1,CT1} = CountingTropical(T1(x.n), CT1(x.c))
-CountingTropical{T1,CT1}(x::Tropical) where {T1,CT1} = CountingTropical{T1,CT1}(T1(TropicalNumbers.content(x)), one(CT1))
+CountingTropical(n::T) where {T <: Real} = CountingTropical{T}(n)
+CountingTropical{T}(n) where {T} = CountingTropical{T, T}(n)
+CountingTropical{T, C}(n) where {T, C} = CountingTropical{T, C}(n, one(C))
+CountingTropical{T, C}(a::Tropical) where {T, C} = CountingTropical{T, C}(a.n)
+CountingTropical{T, C}(a::CountingTropical{T, C}) where {T, C} = a
+CountingTropical{T, C}(a::CountingTropical) where {T, C} = CountingTropical{T, C}(a.n, a.c)
 
 Base.:*(a::CountingTropical, b::CountingTropical) = CountingTropical(a.n + b.n, a.c * b.c)
 Base.:^(a::CountingTropical, b::Real) = CountingTropical(a.n * b, a.c ^ b)
 Base.:^(a::CountingTropical, b::Integer) = CountingTropical(a.n * b, a.c ^ b)
+
 function Base.:+(a::CountingTropical, b::CountingTropical)
-    n = max(a.n, b.n)
     if a.n > b.n
+        n = a.n
         c = a.c
     elseif a.n == b.n
+        n = a.n
         c =  a.c + b.c
     else
+        n = b.n
         c = b.c
     end
+
     CountingTropical(n, c)
 end
-# inverse and division
-Base.inv(x::CountingTropical) = CountingTropical(-x.n, x.c)
 
-Base.typemin(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = CountingTropical(typemin(T), zero(CT))
-Base.zero(::Type{CountingTropical{T}}) where T = zero(CountingTropical{T,T})
-Base.zero(::Type{CountingTropical{T,CT}}) where {T<:Integer,CT} = CountingTropical(T(-999999), zero(CT))
-Base.zero(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = typemin(CountingTropical{T, CT})
+Base.inv(a::CountingTropical) = CountingTropical(-a.n, a.c)
+Base.typemin(::Type{CountingTropical{T, C}}) where {T, C} = CountingTropical(neginf(T), zero(C))
+
+Base.zero(::Type{CountingTropical{T, C}}) where {T, C} = typemin(CountingTropical{T, C})
+Base.zero(::Type{CountingTropical{T}}) where {T} = zero(CountingTropical{T, T})
 Base.zero(::T) where {T <: CountingTropical} = zero(T)
-Base.one(::Type{CountingTropical{T}}) where T = one(CountingTropical{T,T})
-Base.one(::Type{CountingTropical{T,CT}}) where {T<:Integer,CT} = CountingTropical(zero(T), one(CT))
-Base.one(::Type{CountingTropical{T,CT}}) where {T<:AbstractFloat,CT} = CountingTropical(zero(T), one(CT))
-Base.one(::T) where {T <: CountingTropical} = one(T)
-Base.isapprox(a::CountingTropical, b::CountingTropical; kwargs...) = isapprox(a.n, b.n; kwargs...) && isapprox(a.c, b.c; kwargs...)
-Base.isapprox(x::AbstractArray{<:CountingTropical}, y::AbstractArray{<:CountingTropical}; kwargs...) = all(isapprox.(x, y; kwargs...))
-Base.show(io::IO, t::CountingTropical) = Base.print(io, (t.n, t.c))
 
-Base.promote_rule(::Type{CountingTropical{T1,CT1}}, b::Type{CountingTropical{T2,CT2}}) where {T1,T2,CT1,CT2} = CountingTropical{promote_type(T1,T2), promote_type(CT1,CT2)}
+Base.one(::Type{CountingTropical{T, C}}) where {T, C} = CountingTropical(zero(T), one(C))
+Base.one(::Type{CountingTropical{T}}) where {T} = one(CountingTropical{T,T})
+Base.one(::T) where {T <: CountingTropical} = one(T)
+
+Base.isapprox(a::CountingTropical, b::CountingTropical; kw...) = isapprox(a.n, b.n; kw...) && isapprox(a.c, b.c; kw...)
+Base.isapprox(x::AbstractArray{<:CountingTropical}, y::AbstractArray{<:CountingTropical}; kw...) = all(isapprox.(x, y; kw...))
+
+Base.show(io::IO, t::CountingTropical) = Base.print(io, (t.n, t.c))
+Base.promote_rule(::Type{CountingTropical{T, C}}, b::Type{CountingTropical{U, D}}) where {T, U, C, D} = CountingTropical{promote_type(T, U), promote_type(C, D)}
 
 content(a::CountingTropical) = a.n
 content(::Type{<:CountingTropical{T}}) where {T} = T
@@ -72,7 +75,7 @@ Base.:(==)(a::CountingTropical, b::CountingTropical) = a.n == b.n
 Base.:<=(a::CountingTropical, b::CountingTropical) = a.n <= b.n
 Base.:<(a::CountingTropical, b::CountingTropical) = a.n < b.n
 Base.isless(a::CountingTropical, b::CountingTropical) = a < b
-Base.:*(a::CountingTropical, b::Bool) = b ? a : zero(a)
-Base.:*(b::Bool, a::CountingTropical) = b ? a : zero(a)
-Base.:(/)(a::CountingTropical, b::Bool) = b ? a : a / zero(a)
-Base.:(/)(b::Bool, a::CountingTropical) = b ? inv(a) : zero(a)
+Base.:*(a::CountingTropical, b::Bool) = ifelse(b, a, zero(a))
+Base.:*(a::Bool, b::CountingTropical) = b * a
+Base.:/(b::CountingTropical, a::Bool) = ifelse(a, b, b / zero(a))
+Base.:/(b::Bool, a::CountingTropical) = ifelse(b, inv(a), zero(a))

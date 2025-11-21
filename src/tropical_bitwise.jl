@@ -30,6 +30,7 @@ julia> one(TropicalBitwiseI64)
 ```
 """
 const TropicalBitwise = Semiring{Bitwise}
+const TropicalAndOr = TropicalBitwise{Bool}
 
 add_alg(::Type{Bitwise}, a, b) = a | b
 mul_alg(::Type{Bitwise}, a, b) = a & b
@@ -39,3 +40,11 @@ one_alg(::Type{Bitwise}, ::Type{T}) where {T} = ~zero(T)
 
 ldiv_alg(::Type{Bitwise}, a, b) = b | ~a
 rdiv_alg(::Type{Bitwise}, b, a) = ldiv_alg(Bitwise, a, b)
+
+# --------------- #
+# other operators #
+# --------------- #
+
+function Base.isless(a::TropicalAndOr, b::TropicalAndOr)
+    return a < b
+end

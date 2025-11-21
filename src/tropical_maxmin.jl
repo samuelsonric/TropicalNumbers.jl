@@ -36,7 +36,7 @@ mul_alg(::Type{MaxMin}, a, b) = min(a, b)
 zero_alg(::Type{MaxMin}, ::Type{T}) where {T} = neginf(T)
 one_alg(::Type{MaxMin}, ::Type{T}) where {T} = posinf(T)
 
-ldiv_alg(::Type{MaxMin}, a, b::T) where {T} = a <= b ? one_alg(MaxMin, T) : b
+ldiv_alg(::Type{MaxMin}, a, b::T) where {T} = ifelse(a <= b, one_alg(MaxMin, T), b)
 rdiv_alg(::Type{MaxMin}, b, a) = ldiv_alg(MaxMin, a, b)
 
 leq_alg(::Type{MaxMin}, a, b) = a <= b
