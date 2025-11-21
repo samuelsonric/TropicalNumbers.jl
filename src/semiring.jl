@@ -33,6 +33,7 @@ end
 const AbstractSemiring{T} = Semiring{<:AbstractSemiringAlgebra, T}
 const AbstractQuantale{T} = Semiring{<:AbstractQuantaleAlgebra, T}
 const AbstractLattice{T} = Semiring{<:AbstractLatticeAlgebra, T}
+const AbstractTropical{T} = Semiring{<:AbstractTropicalAlgebra, T}
 
 function Semiring{A}(n::T) where {A <: AbstractSemiringAlgebra, T}
     return Semiring{A, T}(n)
@@ -225,7 +226,7 @@ function Base.:/(b::T, a::Bool) where {T <: AbstractQuantale}
 end
 
 function Base.:/(b::Bool, a::T) where {T <: AbstractQuantale}
-    return ifelse(b, one(T) / a, zero(T))
+    return ifelse(b, inv(a), zero(T))
 end
 
 function Base.FastMath.div_fast(b::Semiring{A}, a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
@@ -250,12 +251,9 @@ function Base.:<(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlg
     return lt_alg(A, a.n, b.n)
 end
 
-# -------- #
-# Lattices #
-# -------- #
-
-function Base.:/(b::Bool, a::T) where {T <: AbstractLattice}
-    return ifelse(b, one(T), zero(T))
+function Base.inv(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    n = inv_alg(A, a.n)
+    return Semiring{A}(n)
 end
 
 # -------- #
@@ -269,10 +267,5 @@ end
 
 function Base.:^(a::Semiring{A}, b::Integer) where {A <: AbstractTropicalAlgebra}
     n = exp_alg(A, a.n, b)
-    return Semiring{A}(n)
-end
-
-function Base.inv(a::Semiring{A}) where {A <: AbstractTropicalAlgebra}
-    n = inv_alg(A, a.n)
     return Semiring{A}(n)
 end

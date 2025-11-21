@@ -4,8 +4,13 @@ using TropicalNumbers
 @testset "counting tropical" begin
     ct1 = CountingTropical(2.0, 4.0)
     ct2 = CountingTropical(2.0, 3.0)
+    @test content(ct1) == 2.0
+    @test content(typeof(ct1)) == Float64
+    @test inv(ct1) == CountingTropical(-2.0, 4.0)
     @test ct1 * true == ct1
-    @test ct1 * false == CountingTropical(-Inf, 1.0)
+    # @test ct1 / true == ct1
+    @test false * ct1 == CountingTropical(-Inf, 1.0)
+    @test false / ct1 == CountingTropical(-Inf, 1.0)
     @test one(ct1) == CountingTropical(0.0, 1.0)
     @test zero(ct1) == CountingTropical(-Inf, 1.0)
     res1 = ct1 + ct2
@@ -34,9 +39,12 @@ using TropicalNumbers
     @test promote_type(CountingTropical{Float64,Float32}, CountingTropicalF32, CountingTropical{Int32,Int32}) == CountingTropical{Float64,Float32}
 
     @test one(CountingTropical{Float64}) == one(CountingTropicalF64)
+    @test isinf(CountingTropical(-Inf))
     @test isnan(CountingTropical(NaN))
+    @test !isinf(CountingTropical(NaN))
     @test !isnan(CountingTropical(-Inf))
 
     @test CountingTropical(2.0, 3.0) ^ 3.0 == CountingTropical(2.0, 3.0) * CountingTropical(2.0, 3.0) * CountingTropical(2.0, 3.0)
     @test CountingTropical(2.0, 3.0) ^ 3 == CountingTropical(2.0, 3.0) * CountingTropical(2.0, 3.0) * CountingTropical(2.0, 3.0)
+    @test CountingTropical(1.0, 2.0) <= CountingTropical(1.0, 1.0) < CountingTropical(2.0, 0.0)
 end

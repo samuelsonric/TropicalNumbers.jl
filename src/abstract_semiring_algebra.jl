@@ -112,6 +112,13 @@ function inf_rdiv_alg(::Type{T}, b, a, c) where {T <: AbstractQuantaleAlgebra}
 end
 
 """
+    inv_alg(::Type{T}, a) where {T <: AbstractTropicalAlgebra}
+"""
+function inv_alg(::Type{T}, a) where {T <: AbstractTropicalAlgebra}
+    return div_alg(T, one_alg(T, a), a)
+end
+
+"""
     leq_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
 """
 function leq_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
@@ -129,7 +136,7 @@ end
 # Lattices #
 # -------- #
 
-function typemax_alg(::Type{T}, A::Type) where {T <: AbstractLatticeAlgebra}
+function typemax_alg(::Type{T}, ::Type{A}) where {T <: AbstractLatticeAlgebra, A}
     return one_alg(T, A)
 end
 
@@ -141,6 +148,10 @@ function inf_fast_alg(::Type{T}, a, b) where {T <: AbstractLatticeAlgebra}
     return mul_fast_alg(T, a, b)
 end
 
+function inv_alg(::Type{T}, a::A) where {T <: AbstractLatticeAlgebra, A}
+    return one_alg(T, A)
+end
+
 # -------- #
 # Tropical #
 # -------- #
@@ -150,9 +161,3 @@ end
 """
 exp_alg(::Type{T}, a, b) where {T <: AbstractTropicalAlgebra}
 
-"""
-    inv_alg(::Type{T}, a) where {T <: AbstractTropicalAlgebra}
-"""
-function inv_alg(::Type{T}, a) where {T <: AbstractTropicalAlgebra}
-    return div_alg(T, one_alg(T, a), a)
-end

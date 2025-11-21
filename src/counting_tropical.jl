@@ -77,5 +77,5 @@ Base.:<(a::CountingTropical, b::CountingTropical) = a.n < b.n
 Base.isless(a::CountingTropical, b::CountingTropical) = a < b
 Base.:*(a::CountingTropical, b::Bool) = ifelse(b, a, zero(a))
 Base.:*(a::Bool, b::CountingTropical) = b * a
-Base.:/(b::CountingTropical, a::Bool) = ifelse(a, b, b / zero(a))
+# Base.:/(b::CountingTropical, a::Bool) = ifelse(a, b, b / zero(a))
 Base.:/(b::Bool, a::CountingTropical) = ifelse(b, inv(a), zero(a))
