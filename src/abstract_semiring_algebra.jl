@@ -467,7 +467,7 @@ end
 Evaluate a < b.
 """
 function lt_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
-    return a != b && leq_alg(T, a, b)
+    return (a != b) & leq_alg(T, a, b)
 end
 
 function lt_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuantaleAlgebra}
