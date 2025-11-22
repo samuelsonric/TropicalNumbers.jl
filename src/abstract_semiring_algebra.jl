@@ -42,7 +42,7 @@ The tropical semirings
 
   - ([-∞, +∞], ∧, +, +∞, 0)
   - ([-∞, +∞], ∨, +, -∞, 0)
-  - ([0, +∞], ∨, *, 0, 0)
+  - ([0, +∞], ∨, *, 0, 1)
 
 are commutative quantales with a well-defined exponentiation operation.
 """
