@@ -180,18 +180,37 @@ function Base.typemax(::T) where {T <: AbstractQuantale}
     return typemax(T)
 end
 
+"""
+    inf(a, b)
+
+Compute the infimum a ∧ b.
+"""
 function inf(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = inf_alg(A, a.n, b.n)
     return Semiring{A}(n)
 end
 
+"""
+    inf_fast(a, b)
+
+Compute the infimum a ∧ b.
+"""
 function inf_fast(a, b)
-    return inf(a, b)
+    return a ∧ b
 end
 
 function inf_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = inf_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
+end
+
+"""
+    fia(a, b, c)
+
+Compute (a ∧ b) + c.
+"""
+function fia(a, b, c)
+    return (a ∧ b) + c
 end
 
 function fia(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
@@ -204,6 +223,11 @@ function Base.:\(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlg
     return Semiring{A}(n)
 end
 
+"""
+    ldiv_fast(a, b)
+
+Compute the residual a \\ b.
+"""
 function ldiv_fast(a, b)
     return a \ b
 end
@@ -213,6 +237,11 @@ function ldiv_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleA
     return Semiring{A}(n)
 end
 
+"""
+    fli(a, b, c)
+
+Compute (a \\ b) ∧ c.
+"""
 function fli(a, b, c)
     return (a \ b) ∧ c
 end
@@ -240,6 +269,11 @@ function Base.FastMath.div_fast(b::Semiring{A}, a::Semiring{A}) where {A <: Abst
     return Semiring{A}(n)
 end
 
+"""
+    fri(b, a, c)
+
+Compute (b / a) ∧ c.
+"""
 function fri(b, a, c)
     return (b / a) ∧ c
 end
@@ -249,6 +283,11 @@ function fri(b::Semiring{A}, a::Semiring{A}, c::Semiring{A}) where {A <: Abstrac
     return Semiring{A}(n)
 end
 
+"""
+    imp(a, b)
+
+Compute the implication a → b.
+"""
 function imp(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = imp_alg(A, a.n, b.n)
     return Semiring{A}(n)
@@ -257,6 +296,15 @@ end
 function imp_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = imp_fast_alg(A, a.n, b.n)
     return Semiring{A}(n)
+end
+
+"""
+    fii(a, b, c)
+
+Compute (a → b) ∧ c.
+"""
+function fii(a, b, c)
+    return imp(a, b) ∧ c
 end
 
 function fii(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
@@ -275,6 +323,15 @@ end
 function Base.inv(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     n = inv_alg(A, a.n)
     return Semiring{A}(n)
+end
+
+"""
+    not(a)
+
+Compute the psuedo-complement a → 0.
+"""
+function not(a)
+    return imp(a, zero(a))
 end
 
 function not(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}

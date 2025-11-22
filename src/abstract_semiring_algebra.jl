@@ -7,6 +7,21 @@ A [semiring](https://en.wikipedia.org/wiki/Semiring) is a quintuple (R, +, ×, 0
   - (R, ×, 1) is a monoid
   - multiplication (×) distributes over addition (+)
   - zero (0) is absorbing
+
+To create a new semiring, define a concrete subtype `T <: AbstractSemiringAlgebra`
+as well as the following methods.
+
+  - `zero_alg(::Type{T}, A)`
+  - `one_alg(::Type{T}, A)`
+  - `add_alg(::Type{T}, a, b)`
+  - `mul_alg(::Type{T}, a, b)`
+
+The following additional methods are optional.
+
+  - `add_fast_alg(::Type{T}, a, b)`
+  - `mul_fast_alg(::Type{T}, a, b)`
+  - `mul_add_alg(::Type{T}, a, b, c)`
+
 """
 abstract type AbstractSemiringAlgebra end
 
@@ -15,7 +30,35 @@ abstract type AbstractSemiringAlgebra end
 
 A semiring (R, +, ×, 0, 1) is called a [quantale](https://en.wikipedia.org/wiki/Quantale) if
 it is additionally a [complete lattice](https://en.wikipedia.org/wiki/Complete_lattice) whose
-supremum operation coincides with addition (+).
+supremum operation coincides with addition (+). To create a new quantale, define a concrete
+subtype `T <: AbstractQuantaleAlgebra` as well as the following methods.
+
+  - `zero_alg(::Type{T}, A)`
+  - `one_alg(::Type{T}, A)`
+  - `typemax_alg(::Type{T}, A)`
+  - `add_alg(::Type{T}, a, b)`
+  - `mul_alg(::Type{T}, a, b)`
+  - `inf_alg(::Type{T}, a, b)`
+  - `ldiv_alg(::Type{T}, a, b)`
+  - `rdiv_alg(::Type{T}, b, a)`
+  - `imp_alg(::Type{T}, a, b)`
+
+The following additional methods are optional.
+
+  - `inv_alg(::Type{T}, a)`
+  - `not_alg(::Type{T}, a)`
+  - `add_fast_alg(::Type{T}, a, b)`
+  - `mul_fast_alg(::Type{T}, a, b)`
+  - `inf_fast_alg(::Type{T}, a, b)`
+  - `ldiv_fast_alg(::Type{T}, a, b)`
+  - `rdiv_fast_alg(::Type{T}, b, a)`
+  - `imp_fast_alg(::Type{T}, a, b)`
+  - `mul_add_alg(::Type{T}, a, b, c)`
+  - `inf_add_alg(::Type{T}, a, b, c)`
+  - `inf_ldiv_alg(::Type{T}, a, b, c)`
+  - `inf_rdiv_alg(::Type{T}, b, a, c)`
+  - `inf_imp_alg(::Type{T}, b, a, c)`
+
 """
 abstract type AbstractQuantaleAlgebra <: AbstractSemiringAlgebra end
 
@@ -23,7 +66,32 @@ abstract type AbstractQuantaleAlgebra <: AbstractSemiringAlgebra end
     AbstractCommutativeQuantaleAlgebra <: AbstractQuantaleAlgebra end
 
 A quantale (R, +, ×, 0, 1) is called commutative if the multiplication operation (×)
-commutates.
+commutates. To create a new commutative quantale, define a concrete subtype
+`T <: AbstractCommutativeQuantaleAlgebra` as well as the following methods.
+
+  - `zero_alg(::Type{T}, A)`
+  - `one_alg(::Type{T}, A)`
+  - `typemax_alg(::Type{T}, A)`
+  - `add_alg(::Type{T}, a, b)`
+  - `mul_alg(::Type{T}, a, b)`
+  - `inf_alg(::Type{T}, a, b)`
+  - `ldiv_alg(::Type{T}, a, b)`
+  - `imp_alg(::Type{T}, a, b)`
+
+The following additional methods are optional.
+
+  - `inv_alg(::Type{T}, a)`
+  - `not_alg(::Type{T}, a)`
+  - `add_fast_alg(::Type{T}, a, b)`
+  - `mul_fast_alg(::Type{T}, a, b)`
+  - `inf_fast_alg(::Type{T}, a, b)`
+  - `ldiv_fast_alg(::Type{T}, a, b)`
+  - `imp_fast_alg(::Type{T}, a, b)`
+  - `mul_add_alg(::Type{T}, a, b, c)`
+  - `inf_add_alg(::Type{T}, a, b, c)`
+  - `inf_ldiv_alg(::Type{T}, a, b, c)`
+  - `inf_imp_alg(::Type{T}, b, a, c)`
+
 """
 abstract type AbstractCommutativeQuantaleAlgebra <: AbstractQuantaleAlgebra end
 
@@ -32,7 +100,27 @@ abstract type AbstractCommutativeQuantaleAlgebra <: AbstractQuantaleAlgebra end
 
 A [complete lattice](https://en.wikipedia.org/wiki/Complete_lattice) (R, ≤) can be thought
 of as a semiring (R, +, ×, 0, 1), where addition (+) is the supremum operation, multiplication
-(×) is the infimum operation, 0 is the bottom element, and 1 is the top element.
+(×) is the infimum operation, 0 is the bottom element, and 1 is the top element. To create a new
+complete lattice, define a concrete subtype `T <: AbstractLatticeAlgebra` as well
+as the following methods.
+
+  - `zero_alg(::Type{T}, A)`
+  - `one_alg(::Type{T}, A)`
+  - `add_alg(::Type{T}, a, b)`
+  - `mul_alg(::Type{T}, a, b)`
+  - `ldiv_alg(::Type{T}, a, b)`
+
+The following additional methods are optional.
+
+  - `inv_alg(::Type{T}, a)`
+  - `not_alg(::Type{T}, a)`
+  - `add_fast_alg(::Type{T}, a, b)`
+  - `mul_fast_alg(::Type{T}, a, b)`
+  - `ldiv_fast_alg(::Type{T}, a, b)`
+  - `imp_fast_alg(::Type{T}, a, b)`
+  - `mul_add_alg(::Type{T}, a, b, c)`
+  - `inf_ldiv_alg(::Type{T}, a, b, c)`
+
 """
 abstract type AbstractLatticeAlgebra <: AbstractCommutativeQuantaleAlgebra end
 
