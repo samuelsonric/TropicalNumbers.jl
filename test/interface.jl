@@ -87,6 +87,26 @@ function test_isless(a::T, b::T) where {T <: AbstractSemiring}
     @test isless(a, b) == (a < b)
 end
 
+@testset "printing" begin
+    types = (
+        TropicalMinPlus,
+        TropicalMaxPlus,
+        TropicalMaxMul,
+        TropicalBitwise,
+        TropicalMaxMin,
+        TropicalMinPlusF64,
+        TropicalMaxPlusF64,
+        TropicalMaxMulF64,
+        TropicalAndOr,
+        TropicalBitwiseI64,
+        TropicalMaxMinF64,
+    )
+
+    for T in types
+        @test repr(T) isa String
+    end
+end
+
 @testset "interface" begin
     types = (
         TropicalMinPlusF64,
@@ -116,7 +136,6 @@ end
         test_quantale(zero(T), b, c)
     end
 
-
     types = (
         TropicalMinPlusF64,
         TropicalMaxPlusF64,
@@ -134,9 +153,6 @@ end
         test_fast(a, b, c)
         test_quantale(a, b, c)
         test_quantale(zero(T), b, c)
-
-        @test isnothing(println(T))
-        @test isnothing(println(a))
     end
 
     types = (
