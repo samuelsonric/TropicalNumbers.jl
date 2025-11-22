@@ -48,3 +48,22 @@ ldiv_alg(::Type{Bitwise}, a, b) = b | ~a
 function Base.isless(a::TropicalAndOr, b::TropicalAndOr)
     return a < b
 end
+
+# -------- #
+# printing #
+# -------- #
+
+function Base.show(io::IO, ::Type{TropicalBitwise{T}}) where {T}
+    print(io, "TropicalBitwise{$T}")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalBitwise})
+    print(io, "TropicalBitwise")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalAndOr})
+    print(io, "TropicalBitwise")
+    return
+end

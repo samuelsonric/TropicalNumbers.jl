@@ -134,6 +134,9 @@ end
         test_fast(a, b, c)
         test_quantale(a, b, c)
         test_quantale(zero(T), b, c)
+
+        @test isnothing(println(T))
+        @test isnothing(println(a))
     end
 
     types = (

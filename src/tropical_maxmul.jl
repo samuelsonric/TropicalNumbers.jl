@@ -93,3 +93,17 @@ ldiv_fast_alg(::Type{MaxMul}, a, b) = Base.FastMath.div_fast(b, a)
 function Base.isless(a::TropicalMaxMul, b::TropicalMaxMul)
     return a < b
 end
+
+# -------- #
+# printing #
+# -------- #
+
+function Base.show(io::IO, ::Type{TropicalMaxMul{T}}) where {T}
+    print(io, "TropicalMaxMul{$T}")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalMaxMul})
+    print(io, "TropicalMaxMul")
+    return
+end

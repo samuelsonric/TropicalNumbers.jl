@@ -128,3 +128,27 @@ end
 function Base.isless(a::TropicalMaxMin, b::TropicalMaxMin)
     return a < b
 end
+
+# -------- #
+# printing #
+# -------- #
+
+function Base.show(io::IO, ::Type{Tropical{T}}) where {T}
+    print(io, "Tropical{$T}")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalMaxMin{T}}) where {T}
+    print(io, "TropicalMaxMin{$T}")
+    return
+end
+
+function Base.show(io::IO, ::Type{Tropical})
+    print(io, "Tropical")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalMaxMin})
+    print(io, "TropicalMaxMin")
+    return
+end

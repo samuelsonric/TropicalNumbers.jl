@@ -92,3 +92,17 @@ ldiv_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.sub_fast(b, a)
 function Base.isless(a::TropicalMinPlus, b::TropicalMinPlus)
     return a < b
 end
+
+# -------- #
+# printing #
+# -------- #
+
+function Base.show(io::IO, ::Type{TropicalMinPlus{T}}) where {T}
+    print(io, "TropicalMinPlus{$T}")
+    return
+end
+
+function Base.show(io::IO, ::Type{TropicalMinPlus})
+    print(io, "TropicalMinPlus")
+    return
+end
