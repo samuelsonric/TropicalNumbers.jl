@@ -1,7 +1,7 @@
 """
     AbstractSemiringAlgebra
 
-A [`semiring`](https://en.wikipedia.org/wiki/Semiring) is a quintuple (R, +, ×, 0, 1), where
+A [semiring](https://en.wikipedia.org/wiki/Semiring) is a quintuple (R, +, ×, 0, 1), where
 
   - (R, +, 0) is a commutative monoid
   - (R, ×, 1) is a monoid
@@ -13,9 +13,9 @@ abstract type AbstractSemiringAlgebra end
 """
     AbstractQuantaleAlgebra <: AbstractSemiringAlgebra
 
-A [`semiring`](https://en.wikipedia.org/wiki/Semiring) (R, +, ×, 0, 1) is called a 
-[`quantale`](https://en.wikipedia.org/wiki/Quantale) if it is additionally a complete
-lattice whose supremum operation coincides with addition (+).
+A semiring (R, +, ×, 0, 1) is called a [quantale](https://en.wikipedia.org/wiki/Quantale) if
+it is additionally a [complete lattice](https://en.wikipedia.org/wiki/Complete_lattice) whose
+supremum operation coincides with addition (+).
 """
 abstract type AbstractQuantaleAlgebra <: AbstractSemiringAlgebra end
 
@@ -30,8 +30,9 @@ abstract type AbstractCommutativeQuantaleAlgebra <: AbstractQuantaleAlgebra end
 """
     AbstractLatticeAlgebra <: AbstractCommutativeQuantaleAlgebra
 
-A quantale (R, +, ×, 0, 1) is called Cartesian, if its infimum operation
-coincides with multiplcation (×).
+A [complete lattice](https://en.wikipedia.org/wiki/Complete_lattice) (R, ≤) can be thought
+of as a semiring (R, +, ×, 0, 1), where addition (+) is the supremum operation, multiplication
+(×) is the infimum operation, 0 is the bottom element, and 1 is the top element.
 """
 abstract type AbstractLatticeAlgebra <: AbstractCommutativeQuantaleAlgebra end
 
