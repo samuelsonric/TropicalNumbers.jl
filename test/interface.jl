@@ -1,4 +1,5 @@
 using Base.FastMath: mul_fast, add_fast, div_fast
+using TropicalNumbers: ∧
 
 function test_semiring(a::T, b::T, c::T) where {T <: AbstractSemiring}
     # 1 is the multiplicative identity
