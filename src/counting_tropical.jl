@@ -8,16 +8,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> CountingTropical(1.0, 5.0) + CountingTropical(3.0, 2.0)
-(3.0, 2.0)
+(3.0, 2.0)ₜ
 
 julia> CountingTropical(1.0, 5.0) * CountingTropical(3.0, 2.0)
-(4.0, 10.0)
+(4.0, 10.0)ₜ
 
 julia> one(CountingTropicalF64)
-(0.0, 1.0)
+(0.0, 1.0)ₜ
 
 julia> zero(CountingTropicalF64)
-(-Inf, 0.0)
+(-Inf, 0.0)ₜ
 ```
 """
 struct CountingTropical{T,C} <: Number
@@ -64,7 +64,12 @@ Base.one(::T) where {T <: CountingTropical} = one(T)
 Base.isapprox(a::CountingTropical, b::CountingTropical; kw...) = isapprox(a.n, b.n; kw...) && isapprox(a.c, b.c; kw...)
 Base.isapprox(x::AbstractArray{<:CountingTropical}, y::AbstractArray{<:CountingTropical}; kw...) = all(isapprox.(x, y; kw...))
 
-Base.show(io::IO, t::CountingTropical) = Base.print(io, (t.n, t.c))
+function Base.show(io::IO, t::CountingTropical)
+    print(io, (t.n, t.c))
+    print(io, 'ₜ')
+    return
+end
+
 Base.promote_rule(::Type{CountingTropical{T, C}}, b::Type{CountingTropical{U, D}}) where {T, U, C, D} = CountingTropical{promote_type(T, U), promote_type(C, D)}
 
 content(a::CountingTropical) = a.n

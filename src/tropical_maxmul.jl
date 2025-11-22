@@ -16,16 +16,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxMul(1.0) + TropicalMaxMul(3.0)
-3.0
+3.0ₜ
 
 julia> TropicalMaxMul(1.0) * TropicalMaxMul(3.0)
-3.0
+3.0ₜ
 
 julia> one(TropicalMaxMulF64)
-1.0
+1.0ₜ
 
 julia> zero(TropicalMaxMulF64)
-0.0
+0.0ₜ
 ```
 """
 const TropicalMaxMul = Semiring{MaxMul}

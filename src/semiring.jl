@@ -61,6 +61,7 @@ end
 
 function Base.show(io::IO, a::AbstractSemiring)
     print(io, a.n)
+    print(io, 'ₜ')
     return
 end
 

@@ -17,16 +17,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalBitwise(1) + TropicalBitwise(3)
-3
+3ₜ
 
 julia> TropicalBitwise(1) * TropicalBitwise(3)
-1
+1ₜ
 
 julia> zero(TropicalBitwiseI64)
-0
+0ₜ
 
 julia> one(TropicalBitwiseI64)
--1
+-1ₜ
 ```
 """
 const TropicalBitwise = Semiring{Bitwise}

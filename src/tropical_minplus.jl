@@ -16,16 +16,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMinPlus(1.0) + TropicalMinPlus(3.0)
-1.0
+1.0ₜ
 
 julia> TropicalMinPlus(1.0) * TropicalMinPlus(3.0)
-4.0
+4.0ₜ
 
 julia> one(TropicalMinPlusF64)
-0.0
+0.0ₜ
 
 julia> zero(TropicalMinPlusF64)
-Inf
+Infₜ
 ```
 """
 const TropicalMinPlus = Semiring{MinPlus}

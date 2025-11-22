@@ -16,16 +16,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxPlus(1.0) + TropicalMaxPlus(3.0)
-3.0
+3.0ₜ
 
 julia> TropicalMaxPlus(1.0) * TropicalMaxPlus(3.0)
-4.0
+4.0ₜ
 
 julia> one(TropicalMaxPlusF64)
-0.0
+0.0ₜ
 
 julia> zero(TropicalMaxPlusF64)
--Inf
+-Infₜ
 ```
 """
 const TropicalMaxPlus = Semiring{MaxPlus}
@@ -47,16 +47,16 @@ Example
 -------------------------
 ```jldoctest; setup=:(using TropicalNumbers)
 julia> TropicalMaxMin(1.0) + TropicalMaxMin(3.0)
-3.0
+3.0ₜ
 
 julia> TropicalMaxMin(1.0) * TropicalMaxMin(3.0)
-1.0
+1.0ₜ
 
 julia> zero(TropicalMaxMinF64)
--Inf
+-Infₜ
 
 julia> one(TropicalMaxMinF64)
-Inf
+Infₜ
 ```
 """
 const TropicalMaxMin = Semiring{LatticeAlgebra{MaxPlus}}
