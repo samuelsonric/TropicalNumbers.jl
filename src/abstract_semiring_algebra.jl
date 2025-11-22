@@ -47,12 +47,16 @@ The following additional methods are optional.
 
   - `inv_alg(::Type{T}, a)`
   - `not_alg(::Type{T}, a)`
+  - `le_alg(::Type{T}, a, b)`
+  - `lt_alg(::Type{T}, a, b)`
   - `add_fast_alg(::Type{T}, a, b)`
   - `mul_fast_alg(::Type{T}, a, b)`
   - `inf_fast_alg(::Type{T}, a, b)`
   - `ldiv_fast_alg(::Type{T}, a, b)`
   - `rdiv_fast_alg(::Type{T}, b, a)`
   - `imp_fast_alg(::Type{T}, a, b)`
+  - `le_fast_alg(::Type{T}, a, b)`
+  - `lt_fast_alg(::Type{T}, a, b)`
   - `mul_add_alg(::Type{T}, a, b, c)`
   - `inf_add_alg(::Type{T}, a, b, c)`
   - `inf_ldiv_alg(::Type{T}, a, b, c)`
@@ -82,11 +86,15 @@ The following additional methods are optional.
 
   - `inv_alg(::Type{T}, a)`
   - `not_alg(::Type{T}, a)`
+  - `le_alg(::Type{T}, a, b)`
+  - `lt_alg(::Type{T}, a, b)`
   - `add_fast_alg(::Type{T}, a, b)`
   - `mul_fast_alg(::Type{T}, a, b)`
   - `inf_fast_alg(::Type{T}, a, b)`
   - `ldiv_fast_alg(::Type{T}, a, b)`
   - `imp_fast_alg(::Type{T}, a, b)`
+  - `le_fast_alg(::Type{T}, a, b)`
+  - `lt_fast_alg(::Type{T}, a, b)`
   - `mul_add_alg(::Type{T}, a, b, c)`
   - `inf_add_alg(::Type{T}, a, b, c)`
   - `inf_ldiv_alg(::Type{T}, a, b, c)`
@@ -114,10 +122,14 @@ The following additional methods are optional.
 
   - `inv_alg(::Type{T}, a)`
   - `not_alg(::Type{T}, a)`
+  - `le_alg(::Type{T}, a, b)`
+  - `lt_alg(::Type{T}, a, b)`
   - `add_fast_alg(::Type{T}, a, b)`
   - `mul_fast_alg(::Type{T}, a, b)`
   - `ldiv_fast_alg(::Type{T}, a, b)`
   - `imp_fast_alg(::Type{T}, a, b)`
+  - `le_fast_alg(::Type{T}, a, b)`
+  - `lt_fast_alg(::Type{T}, a, b)`
   - `mul_add_alg(::Type{T}, a, b, c)`
   - `inf_ldiv_alg(::Type{T}, a, b, c)`
 
@@ -225,7 +237,7 @@ end
 Compute (a × b) + c.
 """
 function mul_add_alg(::Type{T}, a, b, c) where {T <: AbstractSemiringAlgebra}
-    return add_fast_alg(T, mul_fast_alg(T, a, b), c)
+    return add_alg(T, mul_alg(T, a, b), c)
 end
 
 function mul_add_alg(::Type{LatticeAlgebra{T}}, a, b, c) where {T <: AbstractQuantaleAlgebra}
@@ -278,7 +290,7 @@ end
 Compute (a ∧ b) + c.
 """
 function inf_add_alg(::Type{T}, a, b, c) where {T <: AbstractQuantaleAlgebra}
-    return add_fast_alg(T, inf_fast_alg(T, a, b), c)
+    return add_alg(T, inf_alg(T, a, b), c)
 end
 
 """
@@ -305,17 +317,13 @@ function ldiv_fast_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuan
     return imp_fast_alg(T, a, b)
 end
 
-function inf_rdiv_alg(::Type{T}, b, a, c) where {T <: AbstractCommutativeQuantaleAlgebra}
-    return inf_ldiv_alg(T, a, b, c)
-end
-
 """
     inf_ldiv_alg(::Type{T}, a, b, c) where {T <: AbstractQuantaleAlgebra}
 
 Compute (a \\ b) ∧ c.
 """
 function inf_ldiv_alg(::Type{T}, a, b, c) where {T <: AbstractQuantaleAlgebra}
-    return inf_fast_alg(T, ldiv_fast_alg(T, a, b), c)
+    return inf_alg(T, ldiv_alg(T, a, b), c)
 end
 
 function inf_ldiv_alg(::Type{LatticeAlgebra{T}}, a, b, c) where {T <: AbstractQuantaleAlgebra}
@@ -352,7 +360,11 @@ end
 Compute (b / a) ∧ c.
 """
 function inf_rdiv_alg(::Type{T}, b, a, c) where {T <: AbstractQuantaleAlgebra}
-    return inf_fast_alg(T, rdiv_fast_alg(T, b, a), c)
+    return inf_alg(T, rdiv_alg(T, b, a), c)
+end
+
+function inf_rdiv_alg(::Type{T}, b, a, c) where {T <: AbstractCommutativeQuantaleAlgebra}
+    return inf_ldiv_alg(T, a, b, c)
 end
 
 """
@@ -367,7 +379,7 @@ function imp_alg(::Type{T}, a, b) where {T <: AbstractLatticeAlgebra}
 end
 
 function imp_alg(::Type{T}, a, b::A) where {T <: AbstractTropicalAlgebra, A}
-    if leq_alg(T, a, b)
+    if le_alg(T, a, b)
         c = typemax_alg(T, A)
     else
         c = b
@@ -395,7 +407,7 @@ end
 Compute (a → b) ∧ c.
 """
 function inf_imp_alg(::Type{T}, a, b, c) where {T <: AbstractQuantaleAlgebra}
-    return inf_fast_alg(T, imp_fast_alg(T, a, b), c)
+    return inf_alg(T, imp_alg(T, a, b), c)
 end
 
 function inf_imp_alg(::Type{T}, a, b, c) where {T <: AbstractLatticeAlgebra}
@@ -403,7 +415,7 @@ function inf_imp_alg(::Type{T}, a, b, c) where {T <: AbstractLatticeAlgebra}
 end
 
 function inf_imp_alg(::Type{T}, a, b::A, c::A) where {T <: AbstractTropicalAlgebra, A}
-    if leq_alg(T, a, b)
+    if le_alg(T, a, b)
         d = c
     else
         d = inf_fast_alg(T, b, c)
@@ -439,7 +451,7 @@ function not_alg(::Type{LatticeAlgebra{T}}, a) where {T <: AbstractQuantaleAlgeb
 end
 
 function not_alg(::Type{T}, a::A) where {T <: AbstractTropicalAlgebra, A}
-    if leq_alg(T, a, zero_alg(T, A))
+    if le_alg(T, a, zero_alg(T, A))
         c = typemax_alg(T, A)
     else
         c = zero_alg(T, A)
@@ -449,16 +461,25 @@ function not_alg(::Type{T}, a::A) where {T <: AbstractTropicalAlgebra, A}
 end
 
 """
-    leq_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+    le_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
 
 Evaluate a ≤ b.
 """
-function leq_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+function le_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
     return add_alg(T, a, b) == b
 end
 
-function leq_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuantaleAlgebra}
-    return leq_alg(T, a, b)
+function le_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuantaleAlgebra}
+    return le_alg(T, a, b)
+end
+
+"""
+    le_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+
+Evaluate a ≤ b.
+"""
+function le_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+    return le_alg(T, a, b)
 end
 
 """
@@ -467,7 +488,7 @@ end
 Evaluate a < b.
 """
 function lt_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
-    return (a != b) & leq_alg(T, a, b)
+    return (a != b) & le_alg(T, a, b)
 end
 
 function lt_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuantaleAlgebra}
@@ -475,8 +496,17 @@ function lt_alg(::Type{LatticeAlgebra{T}}, a, b) where {T <: AbstractQuantaleAlg
 end
 
 """
-    exp_alg(::Type{T}, a, b) where {T <: AbstractTropicalAlgebra}
+    lt_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+
+Evaluate a < b.
+"""
+function lt_fast_alg(::Type{T}, a, b) where {T <: AbstractQuantaleAlgebra}
+    return Base.FastMath.ne_fast(a, b) & le_fast_alg(T, a, b)
+end
+
+"""
+    pow_alg(::Type{T}, a, b) where {T <: AbstractTropicalAlgebra}
 
 Compute the exponent aᵇ.
 """
-exp_alg(::Type{T}, a, b) where {T <: AbstractTropicalAlgebra}
+pow_alg(::Type{T}, a, b) where {T <: AbstractTropicalAlgebra}

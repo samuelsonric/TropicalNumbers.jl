@@ -73,10 +73,6 @@ function Base.isinf(a::AbstractSemiring)
     return isinf(a.n)
 end
 
-function Base.:(==)(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
-    return a.n == b.n
-end
-
 function Base.isapprox(a::Semiring{A}, b::Semiring{A}; kw...) where {A <: AbstractSemiringAlgebra}
     return isapprox(a.n, b.n; kw...)
 end
@@ -157,6 +153,18 @@ end
 function Base.fma(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: AbstractSemiringAlgebra}
     n = mul_add_alg(A, a.n, b.n, c.n)
     return Semiring{A}(n)
+end
+
+function Base.:(==)(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
+    return a.n == b.n
+end
+
+function Base.FastMath.eq_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
+    return Base.FastMath.eq_fast(a.n, b.n)
+end
+
+function Base.FastMath.ne_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractSemiringAlgebra}
+    return Base.FastMath.ne_fast(a.n, b.n)
 end
 
 # --------- #
@@ -313,11 +321,19 @@ function fii(a::Semiring{A}, b::Semiring{A}, c::Semiring{A}) where {A <: Abstrac
 end
 
 function Base.:<=(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
-    return leq_alg(A, a.n, b.n)
+    return le_alg(A, a.n, b.n)
+end
+
+function Base.FastMath.le_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    return le_fast_alg(A, a.n, b.n)
 end
 
 function Base.:<(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
     return lt_alg(A, a.n, b.n)
+end
+
+function Base.FastMath.lt_fast(a::Semiring{A}, b::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
+    return lt_fast_alg(A, a.n, b.n)
 end
 
 function Base.inv(a::Semiring{A}) where {A <: AbstractQuantaleAlgebra}
@@ -344,11 +360,11 @@ end
 # -------- #
 
 function Base.:^(a::Semiring{A}, b::Number) where {A <: AbstractTropicalAlgebra}
-    n = exp_alg(A, a.n, b)
+    n = pow_alg(A, a.n, b)
     return Semiring{A}(n)
 end
 
 function Base.:^(a::Semiring{A}, b::Integer) where {A <: AbstractTropicalAlgebra}
-    n = exp_alg(A, a.n, b)
+    n = pow_alg(A, a.n, b)
     return Semiring{A}(n)
 end

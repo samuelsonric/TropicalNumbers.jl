@@ -38,8 +38,6 @@ inf_alg(::Type{MinPlus}, a, b) = max(a, b)
 #    Inf + -Inf =  Inf
 #
 mul_alg(::Type{MinPlus}, a, b) = a + b
-exp_alg(::Type{MinPlus}, a, b) = a * b
-inv_alg(::Type{MinPlus}, a) = -a
 
 function mul_alg(::Type{MinPlus}, a::T, b::T) where {T <: Rational}
     ⊤ = typemax(T)
@@ -53,6 +51,9 @@ function mul_alg(::Type{MinPlus}, a::T, b::T) where {T <: Rational}
 
     return c
 end
+
+inv_alg(::Type{MinPlus}, a) = -a
+pow_alg(::Type{MinPlus}, a, b) = a * b
 
 zero_alg(::Type{MinPlus}, ::Type{T}) where {T} = posinf(T)
 typemax_alg(::Type{MinPlus}, ::Type{T}) where {T} = neginf(T)
@@ -77,13 +78,15 @@ function ldiv_alg(::Type{MinPlus}, a::T, b::T) where {T <: Rational}
     return c
 end
 
-leq_alg(::Type{MinPlus}, a, b) = a >= b
+le_alg(::Type{MinPlus}, a, b) = a >= b
 lt_alg(::Type{MinPlus}, a, b) = a > b
 
-add_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.min_fast(a, b)
-mul_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.add_fast(a, b)
-inf_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.max_fast(a, b)
-ldiv_fast_alg(::Type{MinPlus}, a, b) = Base.FastMath.sub_fast(b, a)
+add_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.min_fast(a, b)
+mul_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.add_fast(a, b)
+inf_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.max_fast(a, b)
+ldiv_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.sub_fast(b, a)
+le_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.le_fast(b, a)
+lt_fast_alg(::Type{MinPlus}, a::AbstractFloat, b::AbstractFloat) = Base.FastMath.lt_fast(b, a)
 
 # --------------- #
 # other operators #

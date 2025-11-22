@@ -1,5 +1,5 @@
-using Base.FastMath: mul_fast, add_fast, div_fast
-using TropicalNumbers: ∧
+using Base.FastMath: mul_fast, add_fast, div_fast, eq_fast, ne_fast, le_fast, lt_fast
+using TropicalNumbers: ∧, AbstractQuantale, AbstractLattice, AbstractTropical
 
 function test_semiring(a::T, b::T, c::T) where {T <: AbstractSemiring}
     # 1 is the multiplicative identity
@@ -25,6 +25,13 @@ function test_semiring(a::T, b::T, c::T) where {T <: AbstractSemiring}
 
     # multiplication left-distributes over addition
     @test a * (b + c) ≈ a * b + a * c
+
+    # fast operations
+    @test a + b ≈ add_fast(a, b)
+    @test a * b ≈ mul_fast(a, b)
+
+    # ternary operations
+    @test (a * b) + c ≈ fma(a, b, c)
 end
 
 function test_quantale(a::T, b::T, c::T) where {T <: AbstractSemiring}
@@ -66,25 +73,74 @@ function test_quantale(a::T, b::T, c::T) where {T <: AbstractSemiring}
 
     # complement agrees with implication
     @test not(a) == imp(a, zero(T))
-end
 
-function test_fast(a::T, b::T, c::T) where {T <: AbstractSemiring}
-    @test a + b ≈ add_fast(a, b)
-    @test a * b ≈ mul_fast(a, b)
+    # fast operations
+    @test (a == b) == eq_fast(a, b)
+    @test (a != b) == ne_fast(a, b)
+    @test (a <= b) == le_fast(a, b)
+    @test (a < b) == lt_fast(a, b)
     @test a ∧ b ≈ inf_fast(a, b)
     @test a / b ≈ div_fast(a, b)
     @test a \ b ≈ ldiv_fast(a, b)
     @test imp(a, b) ≈ imp_fast(a, b)
 
-    @test (a * b) + c ≈ fma(a, b, c)
+    # ternary operations
     @test (a ∧ b) + c ≈ fia(a, b, c)
     @test (a \ b) ∧ c ≈ fli(a, b, c)
     @test (a / b) ∧ c ≈ fri(a, b, c)
     @test imp(a, b) ∧ c ≈ fii(a, b, c) 
 end
 
+function test_commutative_quantale(a::T, b::T, c::T) where {T <: AbstractQuantale}
+    test_quantale(a, b, c)
+
+    # multiplication is commutative
+    @test a * b == b * a
+
+    # residuation is commutative
+    @test a \ b == b / a
+end
+
+function test_lattice(a::T, b::T, c::T) where {T <: AbstractLattice}
+    test_commutative_quantale(a, b, c)
+
+    # product is infimum
+    @test a ∧ b ≈ a * b
+
+    # implication is residuation
+    @test a \ b ≈ imp(a, b)
+end
+
+function test_tropical(a::T, b::T, c::T) where {T <: AbstractTropical}
+    test_commutative_quantale(a, b, c)
+
+    # integer powers
+    @test a ^ 1 ≈ a
+    @test a ^ 3 ≈ a * a * a
+
+    # real powers
+    @test a ^ 1.0 ≈ a
+    @test a ^ 3.0 ≈ a * a * a
+end
+
 function test_isless(a::T, b::T) where {T <: AbstractSemiring}
     @test isless(a, b) == (a < b)
+end
+
+function test_type(a::T, b::T, c::T) where {T <: AbstractSemiring}
+    if T <: AbstractTropical
+        test_tropical(a, b, c)
+    elseif T <: AbstractLattice
+        test_lattice(a, b, c)
+    elseif T <: AbstractQuantale
+        test_quantale(a, b, c)
+    else
+        test_semiring(a, b, c)
+    end
+
+    if T <: Union{AbstractTropical, TropicalMaxMin, TropicalAndOr}
+        test_isless(a, b)
+    end
 end
 
 @testset "printing" begin
@@ -113,34 +169,6 @@ end
         TropicalMaxPlusF64,
         TropicalMaxMulF64,
         TropicalAndOr,
-        TropicalMaxMinF64,
-    )
-
-    for T in types
-        a = rand(T)
-        b = rand(T)
-
-        test_isless(a, b)
-        test_isless(a, a)
-        test_isless(a, zero(T))
-        test_isless(a, typemax(T))
-    end
-
-    for T in types
-        a = rand(T)
-        b = rand(T)
-        c = rand(T)
-
-        test_fast(a, b, c)
-        test_quantale(a, b, c)
-        test_quantale(zero(T), b, c)
-    end
-
-    types = (
-        TropicalMinPlusF64,
-        TropicalMaxPlusF64,
-        TropicalMaxMulF64,
-        TropicalAndOr,
         TropicalBitwiseI64,
         TropicalMaxMinF64,
     )
@@ -150,28 +178,25 @@ end
         b = rand(T)
         c = rand(T)
 
-        test_fast(a, b, c)
-        test_quantale(a, b, c)
-        test_quantale(zero(T), b, c)
+        test_type(a, b, c)
     end
 
     types = (
         TropicalMinPlus{Rational{Int}},
         TropicalMaxPlus{Rational{Int}},
-        TropicalMaxMul{Rational{Int}},
-    )
+        TropicalMaxMul{Rational{Int}}, 
+   )
 
     a = 1 // 2
     b = 2 // 3
     c = 3 // 4
 
     for T in types
-        test_fast(T(a), T(b), T(c))
-        test_quantale(T(a), T(b), T(c))
-        test_quantale(zero(T), T(b), T(c))
-        test_quantale(T(a), zero(T), zero(T))
-        test_quantale(typemax(T), T(b), T(c))
-        test_quantale(typemax(T), zero(T), T(c))
-        test_quantale(typemax(T), T(b), typemax(T))
+        test_type(T(a), T(b), T(c))
+        test_type(zero(T), T(b), T(c))
+        test_type(T(a), zero(T), zero(T))
+        test_type(typemax(T), T(b), T(c))
+        test_type(typemax(T), zero(T), T(c))
+        test_type(typemax(T), T(b), typemax(T))
     end
 end
